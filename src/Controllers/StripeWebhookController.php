@@ -1,0 +1,92 @@
+<?php
+
+namespace Shekel\Controllers;
+
+use App\User;
+use Carbon\Carbon;
+use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactoryAlias;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
+use Shekel\Models\Subscription;
+
+class StripeWebhookController
+{
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function handleWebhook(Request $request)
+    {
+        $payload = json_decode($request->getContent(), true);
+        $method = 'handle' . Str::studly(str_replace('.', '_', $payload['type']));
+        if (method_exists($this, $method)) {
+            $response = $this->{$method}($payload);
+
+            return $response;
+        }
+
+        return response('Method not found.', 404);
+
+    }
+
+
+    /**
+     * @param array $payload
+     * @return ResponseFactoryAlias|Response|void
+     * @throws \Exception
+     */
+    protected function handleCustomerSubscriptionUpdated(array $payload)
+    {
+
+        $customer_id = $payload['data']['object']['customer'];
+        $user = User::with('subscriptions')->where('meta->stripe->customer_id', $customer_id)->first();
+
+        $data = $payload['data']['object'];
+        $subscription_id = $data['id'];
+
+        /** @var Subscription $subscription */
+        $subscription = $user->subscriptions->filter(function (Subscription $subscription) use ($subscription_id) {
+            return $subscription->getMeta('stripe.id') === $subscription_id;
+        })->first();
+
+        if (isset($data['status']) && $data['status'] === 'incomplete_expired') {
+            $subscription->delete();
+
+            return;
+        }
+
+        //Quantity...
+        if (isset($data['quantity'])) {
+            $subscription->setMeta('stripe.quantity', $data['quantity']);
+        }
+        // Plan...
+        if (isset($data['plan']['id'])) {
+            $subscription->setMeta('stripe.plan_id', $data['plan']['id']);
+        }
+        // Trial ending date...
+        if (isset($data['trial_end'])) {
+            $trial_ends = Carbon::createFromTimestamp($data['trial_end']);
+            if (!$subscription->trial_ends_at || $subscription->trial_ends_at->ne($trial_ends)) {
+                $subscription->trial_ends_at = $trial_ends;
+            }
+        }
+        // Cancellation date...
+        if (isset($data['cancel_at_period_end'])) {
+            if ($data['cancel_at_period_end']) {
+                $subscription->ends_at = $subscription->onTrial() ? $subscription->trial_ends_at : Carbon::createFromTimestamp($data['current_period_end']);
+            } else {
+                $subscription->ends_at = null;
+            }
+        }
+        // Status...
+        if (isset($data['status'])) {
+            $subscription->setMeta('stripe.status', $data['status']);
+        }
+
+        $subscription->save();
+
+        return response('OK', 200);
+    }
+
+}

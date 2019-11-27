@@ -112,6 +112,7 @@ Last thing to do is adding `shekel-form` class to your html form.
 ### Subscriptions
 
 After submitting a form to your controller you need to subscribe the user to a plan. To do that all you need to do is call ***stripeSubscription*** method on the user model.
+First argument is plan id that you are subscribing to and the second parameter is a payment method string privided by stripe from the credit card form.
 
 ```php
     class RegisterController extends Controller {
@@ -158,7 +159,7 @@ If you want to cancel the subscription now use ***cancelNow*** method.
 ### Changing the plan that user subscribes to
 
 If you want to change users subscription plan just call ***changePlan*** method on any subscription.
-
+Single argument needed is the plan id that you want to swap to.
 ```php
     $user->subscription()->changePlan(2);
 ```
@@ -167,6 +168,7 @@ If you want to change users subscription plan just call ***changePlan*** method 
 ### Handling subscription quantities
 
 If you have a quantity based subscription (eg. subscription price is based on how many users a team has) then you can use ***changeQuantity*** method to increase or decrease it.
+Single argument required is the quantity amount number.
 
 ```php
     $user->subscription()->changeQuantity(2);

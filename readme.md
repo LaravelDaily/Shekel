@@ -130,6 +130,51 @@ After submitting a form to your controller you need to subscribe the user to a p
 
 And thats it. Your user is now subscribed to your defined plan.
 
+### Canceling a subscripton
+
+To cancel a subscription just run:
+
+```php
+    $user->subscription()->cancel();
+```
+
+To cancel multiple subscriptions use the provided ***subscritions*** relationship:
+
+```php 
+    use Shekel\Models\Subscription;
+
+    $user->subscriptions()->each(function(Subscription $subscription) {
+        $subscription->cancel();
+    });
+```
+
+By default canceling a subscription will hold it's grace period until the subscription expires. 
+If you want to cancel the subscription now use ***cancelNow*** method.
+
+```php
+    $user->subscription()->cancelNow();
+```
+
+### Changing the plan that user subscribes to
+
+If you want to change users subscription plan just call ***changePlan*** method on any subscription.
+
+```php
+    $user->subscription()->changePlan(2);
+```
 
 
+### Handling subscription quantities
+
+If you have a quantity based subscription (eg. subscription price is based on how many users a team has) then you can use ***changeQuantity*** method to increase or decrease it.
+
+```php
+    $user->subscription()->changeQuantity(2);
+```
+
+By default quantity is always set to 1 so if you want to adjust the quantity while creating the subscription use ***quantity*** method.
+
+```php 
+    $user->stripeSubscription($plan_id, $paymentMethod)->quantity(2)->create();
+```
 

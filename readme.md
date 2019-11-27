@@ -24,7 +24,7 @@ table. Additionally **subscriptions** and **plans** tables will be created.
 
 ## Configuration
 
-###Billable model
+### Billable model
 
 To use shekel just add **Billable** trait to your model that you will be billing.
 
@@ -54,9 +54,9 @@ STRIPE_SECRET=sk_test_xxxxxx
 //TODO CURRENCY (now default us dollar)
 
 
-#Usage
+# Usage
 
-###Plans
+### Plans
 
 In order to make subscriptions first you need to create a new plan. To do so you can use ***CreatePlan*** action in your controller provided by the package.
 This action has it's own validation so you don't need to validate the data yourself.
@@ -76,7 +76,7 @@ use Shekel\Actions\CreatePlan
 
 If all is successful you should go to your stripe dashboard > Billing > Products and see a new product created.
 
-###Forms
+### Forms
 
 After creating a plan you need to setup a payment form.
 
@@ -109,7 +109,7 @@ Last thing to do is adding `shekel-form` class to your html form.
 
 //TODO Think through use case scenarios and make more convenient helpers. Adding a class to a form is not practical and register form is not the only use case.
 
-###Subscriptions
+### Subscriptions
 
 After submitting a form to your controller you need to subscribe the user to a plan. To do that all you need to do is call ***stripeSubscription*** method on the user model.
 

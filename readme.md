@@ -16,7 +16,7 @@ Shekel\ShekelServiceProvider::class,
 
 ## Migrations
 
-In order to use shekel you need to run migrations. It will add a **meta** table to your **users**
+In order to use shekel you need to run migrations. It will add a **meta** field to your **users**
 table. Additionally **subscriptions** and **plans** tables will be created.
 
 //TODO make migrations publishable and add flags to disable migrations

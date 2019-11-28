@@ -78,9 +78,11 @@ NOTICE: stripe does not allow updating any fields except ***trial_period_days***
 so all updates are validated and will throw ValidationException if you try to update any restricted fields.
 
 ```php
-$plan->update(['title' => 'my-title']) //WILL THROW AN EXCEPTION
+//WILL THROW AN EXCEPTION
+$plan->update(['title' => 'my-title']);
     
-$plan->update(['trial_period_days' => 10]); //WILL UPDATE NORMALY
+//WILL UPDATE NORMALY
+$plan->update(['trial_period_days' => 10]); 
 ```
 
 To delete a plan just call the delete method.

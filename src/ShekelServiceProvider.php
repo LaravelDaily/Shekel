@@ -26,10 +26,16 @@ class ShekelServiceProvider extends ServiceProvider
     {
         Plan::observe(PlanObserver::class);
 
-        if (config('shekel.stripe.secret_key')) {
-            Shekel::activatePaymentProvider('stripe');
+        foreach (config('shekel.active_payment_providers') as $provider) {
+            Shekel::activatePaymentProvider($provider);
         }
 
+        $this->publish();
+
+    }
+
+    public function publish()
+    {
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/shekel.php.php' => $this->app->configPath('shekel.php'),
@@ -41,7 +47,6 @@ class ShekelServiceProvider extends ServiceProvider
                 __DIR__ . '/../views' => $this->app->resourcePath('views/vendor/shekel'),
             ], 'shekel-views');
         }
-
     }
 
 }

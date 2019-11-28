@@ -23,4 +23,9 @@ class Subscription extends Model
      * BRAINTREE - 'Pending', 'Active', 'Past Due', 'Expired', 'Canceled'
      */
 
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
 }

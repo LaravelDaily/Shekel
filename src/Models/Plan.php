@@ -25,5 +25,9 @@ class Plan extends Model
     //Stripe prevents updating any field except trial_period_days
     const RESTRICTED_FIELDS = ['title', 'price', 'billing_period'];
 
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
 
 }

@@ -5,6 +5,7 @@ namespace Shekel;
 
 
 use Shekel\Contracts\PaymentProviderContract;
+use Shekel\Exceptions\PaymentProviderNotFoundException;
 use Shekel\Providers\StripePaymentProvider;
 
 class Shekel
@@ -44,11 +45,8 @@ class Shekel
         if (!$provider instanceof PaymentProviderContract) {
             throw new \Exception('Payment provider has to implement "' . PaymentProviderContract::class . '" in order to be active');
         }
-        if (!isset($provider::$key)) {
-            throw new \Exception('Payment provider needs to have a static key (static $key = "provider-name")');
-        }
 
-        self::$activePaymentProviders[$provider::$key] = $provider;
+        self::$activePaymentProviders[$provider::key()] = $provider;
     }
 
     /**
@@ -63,7 +61,7 @@ class Shekel
         }
 
         foreach (self::$activePaymentProviders as $paymentProvider) {
-            if (get_class($paymentProvider) === $provider || $paymentProvider::$key === $provider) {
+            if (get_class($paymentProvider) === $provider || $paymentProvider::key() === $provider) {
                 return true;
             }
         }
@@ -79,12 +77,12 @@ class Shekel
     public static function getPaymentProvider(string $provider): PaymentProviderContract
     {
         foreach (self::$activePaymentProviders as $paymentProvider) {
-            if (get_class($paymentProvider) === $provider || $paymentProvider::$key === $provider) {
+            if (get_class($paymentProvider) === $provider || $paymentProvider::key() === $provider) {
                 return $paymentProvider;
             }
         }
 
-        throw new \Exception('Payment provider : ' . $provider . ' not found.');
+        throw new PaymentProviderNotFoundException('Payment provider : ' . $provider . ' not found.');
     }
 
     /**

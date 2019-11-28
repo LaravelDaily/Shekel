@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Shekel\Builders\StripeSubscriptionBuilder;
 use Shekel\Models\Subscription;
+use Shekel\Shekel;
 
 /**
  * Trait Billable
@@ -25,6 +26,7 @@ trait Billable
      * @param string $paymentMethod
      * @return StripeSubscriptionBuilder
      * @throws \Stripe\Exception\ApiErrorException
+     * @deprecated
      */
     public function stripeSubscription(int $plan_id, string $paymentMethod): StripeSubscriptionBuilder
     {
@@ -35,16 +37,12 @@ trait Billable
      * @param string $paymentProvider
      * @param int $plan_id
      * @param string $paymentMethod
-     * @return StripeSubscriptionBuilder
-     * @throws \Stripe\Exception\ApiErrorException
+     * @return mixed
+     * @throws \Exception
      */
     public function newSubscription(string $paymentProvider, int $plan_id, string $paymentMethod)
     {
-        switch ($paymentProvider) {
-            case 'stripe':
-                return new StripeSubscriptionBuilder($this, $plan_id, $paymentMethod);
-                break;
-        }
+        return Shekel::getPaymentProvider($paymentProvider)->getSubscriptionBuilder($this, $plan_id, $paymentMethod);
     }
 
     /**

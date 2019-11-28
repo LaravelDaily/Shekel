@@ -7,6 +7,7 @@ namespace Shekel\Observers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Shekel\Exceptions\PlanHasActiveSubscriptionsException;
 use Shekel\Exceptions\UpdatingRestrictedPlanFieldException;
 use Shekel\Models\Plan;
 use Shekel\Shekel;
@@ -95,6 +96,10 @@ class PlanObserver
 
     public function deleting(Plan $plan)
     {
+        if ($plan->subscriptions()->count() > 0) {
+            throw new PlanHasActiveSubscriptionsException();
+        }
+
         //TODO SHOULD CHECK FOR ACTIVE SUBSCRIPTIONS HERE???
         if (Shekel::stripeActive()) {
             $stripePlanId = $plan->getMeta('stripe.plan_id');

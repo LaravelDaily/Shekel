@@ -54,7 +54,7 @@ abstract class TestCase extends OrchestraTestCase
             'meta' => ['stripe' => ['plan_id' => 'plan_00000000000000']],
         ]);
 
-        $subscription = Subscription::create([
+        Subscription::create([
             'plan_id' => $plan->id,
             'user_id' => $user->id,
             'payment_provider' => 'stripe',

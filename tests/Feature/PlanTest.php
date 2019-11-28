@@ -4,6 +4,7 @@
 namespace Shekel\Tests\Feature;
 
 use Illuminate\Validation\ValidationException;
+use Shekel\Exceptions\PlanHasActiveSubscriptionsException;
 use Shekel\Exceptions\UpdatingRestrictedPlanFieldException;
 use Shekel\Models\Plan;
 use Shekel\Shekel;
@@ -45,6 +46,8 @@ class PlanTest extends TestCase
         $this->assertEquals($stripePlan->currency, 'usd');
         $this->assertEquals($stripePlan->trial_period_days, 30);
 
+        $this->assertDatabaseHas('plans', ['id' => $plan->id, 'price' => 999, 'billing_period' => 'month', 'trial_period_days' => 30]);
+
         //CLEANUP THE CREATE PLAN AND PRODUCT IN STRIPE
         $product_id = $stripePlan->product;
         $stripePlan->delete();
@@ -58,6 +61,8 @@ class PlanTest extends TestCase
         $plan = $this->makePlan();
         $this->expectException(UpdatingRestrictedPlanFieldException::class);
         $plan->update(['title' => 'test-title']);
+
+        $this->assertDatabaseMissing('plans', ['title' => 'test-title']);
     }
 
     public function test_that_trial_cant_exceed_730_days_while_updating()
@@ -67,6 +72,8 @@ class PlanTest extends TestCase
         $plan = $this->makePlan();
         $this->expectException(ValidationException::class);
         $plan->update(['trial_period_days' => 800]);
+
+        $this->assertDatabaseMissing('plans', ['trial_period_days' => 800]);
     }
 
     public function test_plan_updating()
@@ -96,6 +103,21 @@ class PlanTest extends TestCase
         $this->expectException(InvalidRequestException::class);
         $this->expectExceptionMessage('No such plan: ' . $stripePlanId);
         \Stripe\Plan::retrieve($stripePlanId);
+    }
+
+    public function test_plan_delete_while_having_subscriptions()
+    {
+
+        $this->createTestData();
+        /** @var Plan $plan */
+        $plan = Plan::first();
+
+        $this->expectException(PlanHasActiveSubscriptionsException::class);
+        $plan->delete();
+
+        $this->assertDatabaseHas('plans', ['id' => $plan->id]);
+        $stripePlan = \Stripe\Plan::retrieve($plan->getMeta('stripe.plan_id'));
+        $this->assertNotNull($stripePlan);
     }
 
 }

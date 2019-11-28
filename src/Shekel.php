@@ -52,7 +52,6 @@ class Shekel
     /**
      * @param string $provider
      * @return bool
-     * TODO SHOULD CACHE THIS METHOD WITH CACHEABLE TRAIT
      */
     public static function paymentProviderActive(string $provider): bool
     {

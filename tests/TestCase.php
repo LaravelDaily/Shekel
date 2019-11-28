@@ -36,25 +36,34 @@ abstract class TestCase extends OrchestraTestCase
         Shekel::$disableAllProviders = false;
     }
 
-    public function createTestData()
+    public function makeUser($data = []): User
     {
         /** @var User $user */
-        $user = User::create([
+        return User::create(array_merge([
             'name' => 'Admin',
             'email' => 'admin@admin.com',
             'password' => Hash::make('password'),
             'meta' => ['stripe' => ['customer_id' => 'cus_00000000000000']],
-        ]);
+        ], $data));
+    }
 
-        $plan = Plan::create([
+    public function makePlan($data = []): Plan
+    {
+        return Plan::create(array_merge([
             'title' => 'plan1',
             'price' => 999,
             'billing_period' => 'month',
             'trial_period_days' => 30,
             'meta' => ['stripe' => ['plan_id' => 'plan_00000000000000']],
-        ]);
+        ], $data));
+    }
 
-        Subscription::create([
+    public function makeSubscription(): Subscription
+    {
+        $user = $this->makeUser();
+        $plan = $this->makePlan();
+
+        return Subscription::create([
             'plan_id' => $plan->id,
             'user_id' => $user->id,
             'payment_provider' => 'stripe',

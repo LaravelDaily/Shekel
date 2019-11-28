@@ -2,7 +2,6 @@
 
 namespace Shekel\Builders;
 
-use App\User;
 use Carbon\Carbon;
 use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Models\Plan;
@@ -10,7 +9,6 @@ use Shekel\Models\Subscription;
 
 class StripeSubscriptionBuilder implements SubscriptionBuilderContract
 {
-    /** @var User */
     private $user;
 
     /** @var Plan */
@@ -33,19 +31,19 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
 
     /**
      * StripeSubscriptionBuilder constructor.
-     * @param User $user
+     * @param $user
      * @param int $plan_id
      * @param string $paymentMethod
      * @throws \Stripe\Exception\ApiErrorException
      */
-    public function __construct(User $user, int $plan_id, string $paymentMethod)
+    public function __construct($user, int $plan_id, string $paymentMethod)
     {
         $this->user = $user;
         $this->plan_id = $plan_id;
         $this->paymentMethod = $paymentMethod;
         $this->plan = Plan::findOrFail($plan_id);
 
-        $this->stripePlan = \Stripe\Plan::retrieve($this->plan->getMeta('stripe.id'));
+        $this->stripePlan = \Stripe\Plan::retrieve($this->plan->getMeta('stripe.plan_id'));
     }
 
     /**
@@ -71,7 +69,7 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
      * @return $this
      * @throws \Stripe\Exception\ApiErrorException
      */
-    public function create()
+    public function create(): Subscription
     {
         $this->stripeCustomer = $this->getStripeCustomer();
 
@@ -104,7 +102,7 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
         ]);
         $subscription->save();
 
-        return $this;
+        return $subscription;
     }
 
     /**

@@ -14,7 +14,7 @@ use Stripe\Exception\InvalidRequestException;
 class PlanTest extends TestCase
 {
 
-    private function makePlan(array $fields = []): Plan
+    private function newPlan(array $fields = []): Plan
     {
         return Plan::create(array_merge([
             'title' => 'basic',
@@ -28,13 +28,13 @@ class PlanTest extends TestCase
     {
         Shekel::$disableAllProviders = true;
         $this->expectException(ValidationException::class);
-        $this->makePlan(['trial_period_days' => 800]);
+        $this->newPlan(['trial_period_days' => 800]);
     }
 
     public function test_plan_creation()
     {
         /** @var Plan $plan */
-        $plan = $this->makePlan();
+        $plan = $this->newPlan();
 
         $this->assertDatabaseHas('plans', ['id' => $plan->id]);
         $this->assertNotNull($plan->getMeta('stripe.plan_id'));
@@ -58,7 +58,7 @@ class PlanTest extends TestCase
     {
         Shekel::$disableAllProviders = true;
 
-        $plan = $this->makePlan();
+        $plan = $this->newPlan();
         $this->expectException(UpdatingRestrictedPlanFieldException::class);
         $plan->update(['title' => 'test-title']);
 
@@ -69,7 +69,7 @@ class PlanTest extends TestCase
     {
         Shekel::$disableAllProviders = true;
 
-        $plan = $this->makePlan();
+        $plan = $this->newPlan();
         $this->expectException(ValidationException::class);
         $plan->update(['trial_period_days' => 800]);
 
@@ -78,7 +78,7 @@ class PlanTest extends TestCase
 
     public function test_plan_updating()
     {
-        $plan = $this->makePlan();
+        $plan = $this->newPlan();
         $plan->update(['trial_period_days' => 100]);
 
         $stripePlan = \Stripe\Plan::retrieve($plan->getMeta('stripe.plan_id'));
@@ -92,7 +92,7 @@ class PlanTest extends TestCase
 
     public function test_plan_deletion()
     {
-        $plan = $this->makePlan();
+        $plan = $this->newPlan();
         $planCopy = $plan;
         $stripePlanId = $plan->getMeta('stripe.plan_id');
 
@@ -108,7 +108,7 @@ class PlanTest extends TestCase
     public function test_plan_delete_while_having_subscriptions()
     {
 
-        $this->createTestData();
+        $this->makeSubscription();
         /** @var Plan $plan */
         $plan = Plan::first();
 

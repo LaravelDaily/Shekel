@@ -12,7 +12,7 @@ class StripeWebhookTest extends TestCase
     public function test_customer_subscription_updated()
     {
 
-        $this->createTestData();
+        $this->makeSubscription();
 
         $newQuantity = 123;
 
@@ -51,7 +51,7 @@ class StripeWebhookTest extends TestCase
 
     public function test_customer_subscription_incomplete_expired()
     {
-        $this->createTestData();
+        $this->makeSubscription();
         $payload = $this->getStripeUpdatePayload();
         $payload['data']['object']['status'] = 'incomplete_expired';
 
@@ -64,7 +64,7 @@ class StripeWebhookTest extends TestCase
 
     public function test_customer_subscription_update_to_not_existing_plan()
     {
-        $this->createTestData();
+        $this->makeSubscription();
         $payload = $this->getStripeUpdatePayload();
         $payload['data']['object']['plan']['id'] = 'random_id';
 

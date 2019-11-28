@@ -7,6 +7,7 @@ namespace Shekel\Traits;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Shekel\Builders\StripeSubscriptionBuilder;
+use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Models\Subscription;
 use Shekel\Shekel;
 
@@ -40,7 +41,7 @@ trait Billable
      * @return mixed
      * @throws \Exception
      */
-    public function newSubscription(string $paymentProvider, int $plan_id, string $paymentMethod)
+    public function newSubscription(string $paymentProvider, int $plan_id, string $paymentMethod): SubscriptionBuilderContract
     {
         return Shekel::getPaymentProvider($paymentProvider)->getSubscriptionBuilder($this, $plan_id, $paymentMethod);
     }

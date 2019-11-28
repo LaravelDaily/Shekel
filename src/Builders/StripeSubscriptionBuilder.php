@@ -113,7 +113,7 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
      */
     private function getStripeCustomer()
     {
-        $customer_id = $this->user->getMeta('stripe_customer_id');
+        $customer_id = $this->user->getMeta('stripe.customer_id');
         if (!$customer_id || !$stripeCustomer = \Stripe\Customer::retrieve($customer_id)) {
             $stripeCustomer = \Stripe\Customer::create([
                 'email' => $this->user->email,

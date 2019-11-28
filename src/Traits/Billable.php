@@ -32,6 +32,22 @@ trait Billable
     }
 
     /**
+     * @param string $paymentProvider
+     * @param int $plan_id
+     * @param string $paymentMethod
+     * @return StripeSubscriptionBuilder
+     * @throws \Stripe\Exception\ApiErrorException
+     */
+    public function newSubscription(string $paymentProvider, int $plan_id, string $paymentMethod)
+    {
+        switch ($paymentProvider) {
+            case 'stripe':
+                return new StripeSubscriptionBuilder($this, $plan_id, $paymentMethod);
+                break;
+        }
+    }
+
+    /**
      * @return HasMany
      */
     public function subscriptions(): HasMany

@@ -3,6 +3,8 @@
 namespace Shekel;
 
 use Illuminate\Support\ServiceProvider;
+use Shekel\Models\Plan;
+use Shekel\Observers\PlanObserver;
 
 class ShekelServiceProvider extends ServiceProvider
 {
@@ -22,8 +24,22 @@ class ShekelServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        Plan::observe(PlanObserver::class);
+
         if (config('shekel.stripe.secret_key')) {
             Shekel::activatePaymentProvider('stripe');
+        }
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__ . '/../config/shekel.php.php' => $this->app->configPath('shekel.php'),
+            ], 'shekel-config');
+            $this->publishes([
+                __DIR__ . '/../migrations' => $this->app->databasePath('migrations'),
+            ], 'shekel-migrations');
+            $this->publishes([
+                __DIR__ . '/../views' => $this->app->resourcePath('views/vendor/shekel'),
+            ], 'shekel-views');
         }
 
     }

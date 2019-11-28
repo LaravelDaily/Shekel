@@ -58,13 +58,12 @@ STRIPE_SECRET=sk_test_xxxxxx
 
 ### Plans
 
-In order to make subscriptions first you need to create a new plan. To do so you can use ***CreatePlan*** action in your controller provided by the package.
-This action has it's own validation so you don't need to validate the data yourself.
+In order to make subscriptions first you need to create a new plan.
 
 ```php
-use Shekel\Actions\CreatePlan
+use Shekel\Models\Plan;
 
-(new CreatePlan())([
+$plan = Plan::create([
     'title' => 'Basic monthly', //Your plan name
     'price' => 999, //Plan price in cents
     'billing_period' => 'monthly', //Supported periods - daily, weekly, monthly, yearly
@@ -72,7 +71,24 @@ use Shekel\Actions\CreatePlan
 ]);
 ```
 
-//TODO make a static method for actions that invokes them. (Just so were pretty 'n all)
+All data is validated under the hood, and a plan in stripe database is created assuming stripe is enabled.
+
+To update a plan you can use laravels default update method and the plan will update in stripe also.
+NOTICE: stripe does not allow updating any fields except ***trial_period_days*** 
+so all updates are validated and will throw ValidationException if you try to update any restricted fields.
+
+```php
+$plan->update(['title' => 'my-title']) //WILL THROW AN EXCEPTION
+    
+$plan->update(['trial_period_days' => 10]); //WILL UPDATE NORMALY
+```
+
+To delete a plan just call the delete method.
+Stripe plan will also be deleted (but the product that the plan is attached to will remain intact).
+```php
+$plan->delete();
+```
+
 
 If all is successful you should go to your stripe dashboard > Billing > Products and see a new product created.
 
@@ -115,18 +131,18 @@ After submitting a form to your controller you need to subscribe the user to a p
 First argument is plan id that you are subscribing to and the second parameter is a payment method string privided by stripe from the credit card form.
 
 ```php
-    class RegisterController extends Controller {
-    
-        public function create(Request $request) {
-            $user = User::create($request->all());
-            
-            $plan_id = $request->input('billing_plan_id');
-            $paymentMethod = $request->input('payment_method');
-           
-            $user->stripeSubscription($plan_id, $paymentMethod)->create();
-        }
+class RegisterController extends Controller {
+
+    public function create(Request $request) {
+        $user = User::create($request->all());
         
+        $plan_id = $request->input('billing_plan_id');
+        $paymentMethod = $request->input('payment_method');
+       
+        $user->stripeSubscription($plan_id, $paymentMethod)->create();
     }
+    
+}
 ```
 
 And thats it. Your user is now subscribed to your defined plan.
@@ -136,24 +152,24 @@ And thats it. Your user is now subscribed to your defined plan.
 To cancel a subscription just run:
 
 ```php
-    $user->subscription()->cancel();
+$user->subscription()->cancel();
 ```
 
 To cancel multiple subscriptions use the provided ***subscritions*** relationship:
 
 ```php 
-    use Shekel\Models\Subscription;
+use Shekel\Models\Subscription;
 
-    $user->subscriptions()->each(function(Subscription $subscription) {
-        $subscription->cancel();
-    });
+$user->subscriptions()->each(function(Subscription $subscription) {
+    $subscription->cancel();
+});
 ```
 
 By default canceling a subscription will hold it's grace period until the subscription expires. 
 If you want to cancel the subscription now use ***cancelNow*** method.
 
 ```php
-    $user->subscription()->cancelNow();
+$user->subscription()->cancelNow();
 ```
 
 ### Changing the plan that user subscribes to
@@ -161,7 +177,7 @@ If you want to cancel the subscription now use ***cancelNow*** method.
 If you want to change users subscription plan just call ***changePlan*** method on any subscription.
 Single argument needed is the plan id that you want to swap to.
 ```php
-    $user->subscription()->changePlan(2);
+$user->subscription()->changePlan(2);
 ```
 
 
@@ -171,12 +187,12 @@ If you have a quantity based subscription (eg. subscription price is based on ho
 Single argument required is the quantity amount number.
 
 ```php
-    $user->subscription()->changeQuantity(2);
+$user->subscription()->changeQuantity(2);
 ```
 
 By default quantity is always set to 1 so if you want to adjust the quantity while creating the subscription use ***quantity*** method.
 
 ```php 
-    $user->stripeSubscription($plan_id, $paymentMethod)->quantity(2)->create();
+$user->stripeSubscription($plan_id, $paymentMethod)->quantity(2)->create();
 ```
 

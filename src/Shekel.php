@@ -9,6 +9,8 @@ use Shekel\Providers\StripePaymentProvider;
 
 class Shekel
 {
+    static $disableAllProviders = false;
+
     /** @var PaymentProviderContract[] */
     static $paymentProviders = [
         'stripe' => StripePaymentProvider::class,
@@ -56,6 +58,10 @@ class Shekel
      */
     public static function paymentProviderActive(string $provider): bool
     {
+        if (self::$disableAllProviders) {
+            return false;
+        }
+
         foreach (self::$activePaymentProviders as $paymentProvider) {
             if (get_class($paymentProvider) === $provider || $paymentProvider::$key === $provider) {
                 return true;

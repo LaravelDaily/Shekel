@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'vendors' => ['stripe',],
+
+    'billable_model' => env('BILLABLE_MODEL', 'App\\User'),
 
     'stripe' => [
         'public_key' => env('STRIPE_PUBLIC'),

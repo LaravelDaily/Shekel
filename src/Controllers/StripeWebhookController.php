@@ -8,6 +8,8 @@ use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactoryAlias;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
+use Shekel\Exceptions\StripePlanNotFoundWhileUpdatingException;
+use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
 
 class StripeWebhookController
@@ -38,22 +40,23 @@ class StripeWebhookController
      */
     protected function handleCustomerSubscriptionUpdated(array $payload)
     {
+        $model = config('shekel.billable_model');
 
         $customer_id = $payload['data']['object']['customer'];
-        $user = User::with('subscriptions')->where('meta->stripe->customer_id', $customer_id)->first();
+        $user = $model::with('subscriptions')->where('meta->stripe->customer_id', $customer_id)->first();
 
         $data = $payload['data']['object'];
         $subscription_id = $data['id'];
 
         /** @var Subscription $subscription */
         $subscription = $user->subscriptions->filter(function (Subscription $subscription) use ($subscription_id) {
-            return $subscription->getMeta('stripe.id') === $subscription_id;
+            return $subscription->getMeta('stripe.subscription_id') === $subscription_id;
         })->first();
 
         if (isset($data['status']) && $data['status'] === 'incomplete_expired') {
             $subscription->delete();
 
-            return;
+            return response('OK', 200);
         }
 
         //Quantity...
@@ -63,6 +66,15 @@ class StripeWebhookController
         // Plan...
         if (isset($data['plan']['id'])) {
             $subscription->setMeta('stripe.plan_id', $data['plan']['id']);
+
+            //IF PLAN IS CHANGED IN STRIPE DASHBOARD WE NEED TO CHANGE IT ALSO IN OUR DATABASE
+            $plan = Plan::where('meta->stripe->plan_id', $data['plan']['id'])->first();
+            if (!$plan) {
+                throw new StripePlanNotFoundWhileUpdatingException();
+            }
+
+            $subscription->plan_id = $plan->id;
+
         }
         // Trial ending date...
         if (isset($data['trial_end'])) {

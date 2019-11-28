@@ -18,8 +18,12 @@ class Plan extends Model
 {
     use HasMetaField;
 
+    protected $guarded = [];
+
     const BILLING_PERIODS = ['day', 'week', 'month', 'year'];
 
-    protected $fillable = ['title', 'price', 'billing_period', 'trial_period_days', 'meta'];
+    //Stripe prevents updating any field except trial_period_days
+    const RESTRICTED_FIELDS = ['title', 'price', 'billing_period'];
+
 
 }

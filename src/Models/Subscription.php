@@ -12,7 +12,7 @@ class Subscription extends Model
 {
     use HandlesSubscription, HasMetaField;
 
-    protected $fillable = ['plan_id', 'user_id', 'payment_provider', 'meta', 'trial_ends_at', 'ends_at'];
+    protected $guarded = [];
 
     protected $dates = ['trial_ends_at', 'ends_at'];
 

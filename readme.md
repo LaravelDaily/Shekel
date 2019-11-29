@@ -138,10 +138,10 @@ class RegisterController extends Controller {
     public function create(Request $request) {
         $user = User::create($request->all());
         
-        $plan_id = $request->input('billing_plan_id');
+        $plan = $request->input('billing_plan_id');
         $paymentMethod = $request->input('payment_method');
        
-        $user->stripeSubscription($plan_id, $paymentMethod)->create();
+        $user->newSubscription('stripe', $plan, $paymentMethod)->create();
     }
     
 }
@@ -197,4 +197,16 @@ By default quantity is always set to 1 so if you want to adjust the quantity whi
 ```php 
 $user->stripeSubscription($plan_id, $paymentMethod)->quantity(2)->create();
 ```
+
+### Currencies
+
+Default currency is set to USD, but you can change that in your .env file
+
+```html
+BILLABLE_CURRENCY=eur
+```
+
+List of supported currencies (by stripe for now):
+
+USD, AED, AFN, ALL, AMD, ANG, AOA, ARS, AUD, AWG, AZN, BAM, BBD, BDT, BGN, BIF, BMD, BND, BOB, BRL, BSD, BWP, BZD, CAD, CDF, CHF, CLP, CNY, COP, CRC, CVE, CZK, DJF, DKK, DOP, DZD, EGP, ETB, EUR, FJD, FKP, GBP, GEL, GIP, GMD, GNF, GTQ, GYD, HKD, HNL, HRK, HTG, HUF, IDR, ILS, INR, ISK, JMD, JPY, KES, KGS, KHR, KMF, KRW, KYD, KZT, LAK, LBP, LKR, LRD, LSL, MAD, MDL, MGA, MKD, MMK, MNT, MOP, MRO, MUR, MVR, MWK, MXN, MYR, MZN, NAD, NGN, NIO, NOK, NPR, NZD, PAB, PEN, PGK, PHP, PKR, PLN, PYG, QAR, RON, RSD, RUB, RWF, SAR, SBD, SCR, SEK, SGD, SHP, SLL, SOS, SRD, STD, SZL, THB, TJS, TOP, TRY, TTD, TWD, TZS, UAH, UGX, UYU, UZS, VND, VUV, WST, XAF, XCD, XOF, XPF, YER, ZAR, ZMW, 
 

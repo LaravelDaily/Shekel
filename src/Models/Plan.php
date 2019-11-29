@@ -2,7 +2,9 @@
 
 namespace Shekel\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Shekel\Traits\HasMetaField;
 
 /**
@@ -13,6 +15,10 @@ use Shekel\Traits\HasMetaField;
  * @property integer $price
  * @property string $billing_period
  * @property integer $trial_period_days
+ * @property array $meta
+ * @property Collection subscriptions
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Plan extends Model
 {
@@ -20,6 +26,7 @@ class Plan extends Model
 
     protected $guarded = [];
 
+    //Available plan billing periods (based on stripe billing periods)
     const BILLING_PERIODS = ['day', 'week', 'month', 'year'];
 
     //Stripe prevents updating any field except trial_period_days

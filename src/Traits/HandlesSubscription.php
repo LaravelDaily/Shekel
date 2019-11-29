@@ -4,17 +4,12 @@
 namespace Shekel\Traits;
 
 
-use Carbon\Carbon;
 use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Shekel;
 
 /**
  * Trait HandlesSubscriptions
  * @package Shekel\Traits
- *
- * @property string $payment_provider
- * @property Carbon $ends_at
- * @property Carbon $trial_ends_at
  */
 trait HandlesSubscription
 {
@@ -56,7 +51,7 @@ trait HandlesSubscription
      */
     public function onTrial(): bool
     {
-        return $this->trial_ends_at->gte(now());
+        return $this->trial_ends_at ? $this->trial_ends_at->gte(now()) : false;
     }
 
     /**
@@ -88,6 +83,17 @@ trait HandlesSubscription
     public function changePlan(int $plan_id): self
     {
         $this->handler()->changePlan($plan_id);
+
+        return $this;
+    }
+
+    /**
+     * @return HandlesSubscription
+     * @throws \Exception
+     */
+    public function dontProrate(): self
+    {
+        $this->handler()->dontProrate();
 
         return $this;
     }

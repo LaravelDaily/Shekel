@@ -5,29 +5,15 @@ namespace Shekel;
 
 
 use Shekel\Contracts\PaymentProviderContract;
+use Shekel\Exceptions\CurrencyNotFoundException;
 use Shekel\Exceptions\PaymentProviderNotFoundException;
-use Shekel\Providers\StripePaymentProvider;
 
 class Shekel
 {
     static $disableAllProviders = false;
 
     /** @var PaymentProviderContract[] */
-    static $paymentProviders = [
-        'stripe' => StripePaymentProvider::class,
-    ];
-
-    /** @var PaymentProviderContract[] */
     static $activePaymentProviders = [];
-
-    /**
-     * @return bool
-     * @throws \Exception
-     */
-    public static function stripeActive(): bool
-    {
-        return self::paymentProviderActive(StripePaymentProvider::class);
-    }
 
     /**
      * @param string $provider
@@ -37,8 +23,6 @@ class Shekel
     {
         if (class_exists($provider)) {
             $provider = new $provider();
-        } elseif (isset(self::$paymentProviders[$provider])) {
-            $provider = new self::$paymentProviders[$provider]();
         } else {
             throw new \Exception('Payment provider "' . $provider . '" not found.');
         }
@@ -52,6 +36,7 @@ class Shekel
     /**
      * @param string $provider
      * @return bool
+     * @throws \Exception
      */
     public static function paymentProviderActive(string $provider): bool
     {
@@ -59,13 +44,13 @@ class Shekel
             return false;
         }
 
-        foreach (self::$activePaymentProviders as $paymentProvider) {
-            if (get_class($paymentProvider) === $provider || $paymentProvider::key() === $provider) {
-                return true;
-            }
-        }
+        try {
+            self::getPaymentProvider($provider);
 
-        return false;
+            return true;
+        } catch (PaymentProviderNotFoundException $e) {
+            return false;
+        }
     }
 
     /**
@@ -75,10 +60,11 @@ class Shekel
      */
     public static function getPaymentProvider(string $provider): PaymentProviderContract
     {
-        foreach (self::$activePaymentProviders as $paymentProvider) {
-            if (get_class($paymentProvider) === $provider || $paymentProvider::key() === $provider) {
-                return $paymentProvider;
-            }
+        $key = class_exists($provider) ? $provider::key() : $provider;
+
+        //If resolving by key we can return the value straight from the array
+        if (isset(self::$activePaymentProviders[$key])) {
+            return self::$activePaymentProviders[$key];
         }
 
         throw new PaymentProviderNotFoundException('Payment provider : ' . $provider . ' not found.');
@@ -86,10 +72,154 @@ class Shekel
 
     /**
      * @return string
+     * @throws CurrencyNotFoundException
      */
     public static function getCurrency(): string
     {
-        return 'usd';
+        $currencies = [
+            "USD",
+            "AED",
+            "AFN",
+            "ALL",
+            "AMD",
+            "ANG",
+            "AOA",
+            "ARS",
+            "AUD",
+            "AWG",
+            "AZN",
+            "BAM",
+            "BBD",
+            "BDT",
+            "BGN",
+            "BIF",
+            "BMD",
+            "BND",
+            "BOB",
+            "BRL",
+            "BSD",
+            "BWP",
+            "BZD",
+            "CAD",
+            "CDF",
+            "CHF",
+            "CLP",
+            "CNY",
+            "COP",
+            "CRC",
+            "CVE",
+            "CZK",
+            "DJF",
+            "DKK",
+            "DOP",
+            "DZD",
+            "EGP",
+            "ETB",
+            "EUR",
+            "FJD",
+            "FKP",
+            "GBP",
+            "GEL",
+            "GIP",
+            "GMD",
+            "GNF",
+            "GTQ",
+            "GYD",
+            "HKD",
+            "HNL",
+            "HRK",
+            "HTG",
+            "HUF",
+            "IDR",
+            "ILS",
+            "INR",
+            "ISK",
+            "JMD",
+            "JPY",
+            "KES",
+            "KGS",
+            "KHR",
+            "KMF",
+            "KRW",
+            "KYD",
+            "KZT",
+            "LAK",
+            "LBP",
+            "LKR",
+            "LRD",
+            "LSL",
+            "MAD",
+            "MDL",
+            "MGA",
+            "MKD",
+            "MMK",
+            "MNT",
+            "MOP",
+            "MRO",
+            "MUR",
+            "MVR",
+            "MWK",
+            "MXN",
+            "MYR",
+            "MZN",
+            "NAD",
+            "NGN",
+            "NIO",
+            "NOK",
+            "NPR",
+            "NZD",
+            "PAB",
+            "PEN",
+            "PGK",
+            "PHP",
+            "PKR",
+            "PLN",
+            "PYG",
+            "QAR",
+            "RON",
+            "RSD",
+            "RUB",
+            "RWF",
+            "SAR",
+            "SBD",
+            "SCR",
+            "SEK",
+            "SGD",
+            "SHP",
+            "SLL",
+            "SOS",
+            "SRD",
+            "STD",
+            "SZL",
+            "THB",
+            "TJS",
+            "TOP",
+            "TRY",
+            "TTD",
+            "TWD",
+            "TZS",
+            "UAH",
+            "UGX",
+            "UYU",
+            "UZS",
+            "VND",
+            "VUV",
+            "WST",
+            "XAF",
+            "XCD",
+            "XOF",
+            "XPF",
+            "YER",
+            "ZAR",
+            "ZMW",];
+
+        $currency = env('BILLABLE_CURRENCY', false);
+
+        if ($currency && !in_array(strtoupper($currency), $currencies)) {
+            throw new CurrencyNotFoundException($currency);
+        }
+
+        return $currency ? strtolower($currency) : 'usd';
     }
 
 }

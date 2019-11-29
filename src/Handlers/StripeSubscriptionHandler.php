@@ -9,12 +9,20 @@ use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Exceptions\IncompleteSubscriptionException;
 use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
+use Stripe\Exception\ApiErrorException;
 
 class StripeSubscriptionHandler implements SubscriptionHandlerContract
 {
 
     /** @var Subscription */
     private $subscription;
+
+    /**
+     * If set to true will recalculate the cost of subscription
+     * when changing plan so the user doesn't have to pay all the amount
+     * @var bool
+     */
+    private $prorate = true;
 
     /**
      * StripeSubscriptionHandler constructor.
@@ -26,7 +34,7 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     }
 
     /**
-     * @throws \Stripe\Exception\ApiErrorException
+     * @throws ApiErrorException
      */
     public function cancel(): void
     {
@@ -43,11 +51,10 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         }
 
         $this->subscription->save();
-
     }
 
     /**
-     * @throws \Stripe\Exception\ApiErrorException
+     * @throws ApiErrorException
      */
     public function cancelNow(): void
     {
@@ -59,7 +66,6 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     /**
      * @param int $plan_id
      * @throws \Exception
-     * TODO HANDLE LOCAL SUBSCRIPTION TRIAL END DATE AND END DATE
      */
     public function changePlan(int $plan_id): void
     {
@@ -72,10 +78,11 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
 
         $stripeSubscription = \Stripe\Subscription::retrieve($this->subscription->getMeta('stripe.subscription_id'));
 
-        $stripePlanId = $plan->getMeta('stripe.id');
+        $stripePlanId = $plan->getMeta('stripe.plan_id');
 
         $stripeSubscription->plan = $stripePlanId;
         $stripeSubscription->cancel_at_period_end = false;
+        $stripeSubscription->prorate = $this->prorate;
 
         if ($this->subscription->onTrial()) {
             $stripeSubscription->trial_end = $this->subscription->trial_ends_at->getTimestamp();
@@ -92,7 +99,7 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     /**
      * @param int $quantity
      * @throws IncompleteSubscriptionException
-     * @throws \Stripe\Exception\ApiErrorException
+     * @throws ApiErrorException
      */
     public function changeQuantity(int $quantity): void
     {
@@ -102,6 +109,7 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
 
         $stripeSubscription = \Stripe\Subscription::retrieve($this->subscription->getMeta('stripe.subscription_id'));
         $stripeSubscription->quantity = $quantity;
+        $stripeSubscription->prorate = $this->prorate;
         $stripeSubscription->save();
 
         $this->subscription->setMeta('stripe.quantity', $quantity)->save();
@@ -113,6 +121,14 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     public function incomplete(): bool
     {
         return (bool)$this->subscription->getMeta('stripe.status') === \Stripe\Subscription::STATUS_INCOMPLETE;
+    }
+
+    /**
+     *
+     */
+    public function dontProrate(): void
+    {
+        $this->prorate = false;
     }
 
 }

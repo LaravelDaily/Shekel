@@ -26,7 +26,8 @@ trait HasMetaField
     }
 
     /**
-     * @return object
+     * @param $value
+     * @throws \Exception
      */
     public function setMetaAttribute($value)
     {

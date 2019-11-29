@@ -15,4 +15,6 @@ interface SubscriptionHandlerContract
     public function incomplete(): bool;
 
     public function changeQuantity(int $quantity): void;
+
+    public function dontProrate(): void;
 }

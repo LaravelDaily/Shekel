@@ -42,7 +42,7 @@ class PlanObserver
 
         try {
 
-            if (Shekel::stripeActive()) {
+            if (Shekel::paymentProviderActive('stripe')) {
 
                 $stripePlan = \Stripe\Plan::create([
                     'amount' => $plan->price,
@@ -64,6 +64,7 @@ class PlanObserver
 
     }
 
+
     public function updating(Plan $plan)
     {
 
@@ -84,7 +85,7 @@ class PlanObserver
             throw new ValidationException($validator);
         }
 
-        if (Shekel::stripeActive() && $stripePlanId = $plan->getMeta('stripe.plan_id')) {
+        if (Shekel::paymentProviderActive('stripe') && $stripePlanId = $plan->getMeta('stripe.plan_id')) {
 
             \Stripe\Plan::update($stripePlanId, [
                 'trial_period_days' => $plan->trial_period_days ?? null,
@@ -94,6 +95,7 @@ class PlanObserver
 
     }
 
+
     public function deleting(Plan $plan)
     {
         if ($plan->subscriptions()->count() > 0) {
@@ -101,7 +103,7 @@ class PlanObserver
         }
 
         //TODO SHOULD CHECK FOR ACTIVE SUBSCRIPTIONS HERE???
-        if (Shekel::stripeActive()) {
+        if (Shekel::paymentProviderActive('stripe')) {
             $stripePlanId = $plan->getMeta('stripe.plan_id');
             if ($stripePlanId) {
                 //TODO SHOULD DELETE THE PRODUCT ALSO???

@@ -6,9 +6,11 @@ use Carbon\Carbon;
 use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
+use Shekel\Tests\Fixtures\User;
 
 class StripeSubscriptionBuilder implements SubscriptionBuilderContract
 {
+    /** @var User */
     private $user;
 
     /** @var Plan */
@@ -66,7 +68,7 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
     }
 
     /**
-     * @return $this
+     * @return Subscription
      * @throws \Stripe\Exception\ApiErrorException
      */
     public function create(): Subscription
@@ -74,13 +76,10 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
         $this->stripeCustomer = $this->getStripeCustomer();
 
         $stripeSubscription = $this->stripeCustomer->subscriptions->create([
-            'billing_cycle_anchor' => null,
 //            'coupon' => $this->coupon,
             'expand' => ['latest_invoice.payment_intent'],
-            'metadata' => [],
             'plan' => $this->stripePlan->id,
             'quantity' => $this->getQuantity(),
-            'tax_percent' => 0,
             'off_session' => true,
         ]);
 
@@ -97,9 +96,10 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
                     'quantity' => $stripeSubscription->quantity,
                 ],
             ],
-            'trial_ends_at' => Carbon::createFromFormat('U', $stripeSubscription->trial_end),
+            'trial_ends_at' => $stripeSubscription->trial_end ? Carbon::createFromFormat('U', $stripeSubscription->trial_end) : null,
             'ends_at' => Carbon::createFromFormat('U', $stripeSubscription->current_period_end),
         ]);
+
         $subscription->save();
 
         return $subscription;
@@ -116,6 +116,9 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
             $stripeCustomer = \Stripe\Customer::create([
                 'email' => $this->user->email,
                 'payment_method' => $this->paymentMethod,
+                'invoice_settings' => [
+                    'default_payment_method' => $this->paymentMethod,
+                ],
             ]);
 
             $this->user->setMeta('stripe.customer_id', $stripeCustomer->id)->save();

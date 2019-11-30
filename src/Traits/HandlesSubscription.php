@@ -4,6 +4,7 @@
 namespace Shekel\Traits;
 
 
+use Carbon\Carbon;
 use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Shekel;
 
@@ -94,6 +95,17 @@ trait HandlesSubscription
     public function dontProrate(): self
     {
         $this->handler()->dontProrate();
+
+        return $this;
+    }
+
+    /**
+     * @return HandlesSubscription
+     * @throws \Exception
+     */
+    public function markAsCancelled(): self
+    {
+        $this->handler()->markAsCancelled();
 
         return $this;
     }

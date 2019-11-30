@@ -211,7 +211,8 @@ class Shekel
             "XPF",
             "YER",
             "ZAR",
-            "ZMW",];
+            "ZMW",
+        ];
 
         $currency = env('BILLABLE_CURRENCY', false);
 

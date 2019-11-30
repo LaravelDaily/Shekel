@@ -11,6 +11,7 @@ use Shekel\Models\Subscription;
 use Shekel\Shekel;
 use Shekel\ShekelServiceProvider;
 use Shekel\Tests\Fixtures\User;
+use Stripe\PaymentMethod;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -70,6 +71,19 @@ abstract class TestCase extends OrchestraTestCase
             'meta' => '{"stripe": {"status": "trialing", "plan_id": "plan_00000000000000", "quantity": 1, "subscription_id": "sub_00000000000000"}}',
             'trial_ends_at' => now()->addDays(30),
             'ends_at' => now()->addDays(30),
+        ]);
+    }
+
+    public function makePaymentMethod(): PaymentMethod
+    {
+        return \Stripe\PaymentMethod::create([
+            'type' => 'card',
+            'card' => [
+                'number' => '4242424242424242',
+                'exp_month' => 11,
+                'exp_year' => now()->addYear()->year,
+                'cvc' => '314',
+            ],
         ]);
     }
 }

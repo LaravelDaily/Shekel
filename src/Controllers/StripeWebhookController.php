@@ -4,9 +4,7 @@ namespace Shekel\Controllers;
 
 use App\User;
 use Carbon\Carbon;
-use Illuminate\Contracts\Routing\ResponseFactory as ResponseFactoryAlias;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Shekel\Exceptions\StripePlanNotFoundWhileUpdatingException;
 use Shekel\Models\Plan;
@@ -14,10 +12,7 @@ use Shekel\Models\Subscription;
 
 class StripeWebhookController
 {
-    /**
-     * @param Request $request
-     * @return mixed
-     */
+
     public function handleWebhook(Request $request)
     {
         $payload = json_decode($request->getContent(), true);
@@ -32,12 +27,6 @@ class StripeWebhookController
 
     }
 
-
-    /**
-     * @param array $payload
-     * @return ResponseFactoryAlias|Response|void
-     * @throws \Exception
-     */
     protected function handleCustomerSubscriptionUpdated(array $payload)
     {
         $model = config('shekel.billable_model');
@@ -97,6 +86,24 @@ class StripeWebhookController
         }
 
         $subscription->save();
+
+        return response('OK', 200);
+    }
+
+    protected function handleCustomerSubscriptionDeleted(array $payload)
+    {
+        $model = config('shekel.billable_model');
+
+        $customer_id = $payload['data']['object']['customer'];
+        $user = $model::with('subscriptions')->where('meta->stripe->customer_id', $customer_id)->first();
+
+        if ($user) {
+            $user->subscriptions->filter(function (Subscription $subscription) use ($payload) {
+                return $subscription->getMeta('stripe.subscription_id') === $payload['data']['object']['id'];
+            })->each(function (Subscription $subscription) {
+                $subscription->markAsCancelled();
+            });
+        }
 
         return response('OK', 200);
     }

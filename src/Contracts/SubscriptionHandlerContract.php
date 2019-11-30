@@ -17,4 +17,6 @@ interface SubscriptionHandlerContract
     public function changeQuantity(int $quantity): void;
 
     public function dontProrate(): void;
+
+    public function markAsCancelled(): void;
 }

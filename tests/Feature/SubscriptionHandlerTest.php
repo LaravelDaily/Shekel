@@ -15,15 +15,7 @@ class SubscriptionHandlerTest extends TestCase
         $user = $this->makeUser(['meta' => []]);
         $plan = $this->makePlan(['meta' => []]);
 
-        $paymentMethod = \Stripe\PaymentMethod::create([
-            'type' => 'card',
-            'card' => [
-                'number' => '4242424242424242',
-                'exp_month' => 11,
-                'exp_year' => now()->addYear()->year,
-                'cvc' => '314',
-            ],
-        ]);
+        $paymentMethod = $this->makePaymentMethod();
 
         /** @var Subscription $subscription */
         $subscription = $user->newSubscription('stripe', $plan->id, $paymentMethod->id)->create();

@@ -131,4 +131,14 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $this->prorate = false;
     }
 
+    /*
+     *
+     */
+    public function markAsCancelled(): void
+    {
+        $this->subscription->ends_at = Carbon::now();
+        $this->subscription->setMeta('stripe.status', \Stripe\Subscription::STATUS_CANCELED);
+        $this->subscription->save();
+    }
+
 }

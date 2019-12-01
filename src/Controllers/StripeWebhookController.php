@@ -2,7 +2,6 @@
 
 namespace Shekel\Controllers;
 
-use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,7 +11,6 @@ use Shekel\Models\Subscription;
 
 class StripeWebhookController
 {
-
     public function handleWebhook(Request $request)
     {
         $payload = json_decode($request->getContent(), true);
@@ -24,7 +22,6 @@ class StripeWebhookController
         }
 
         return response('Method not found.', 404);
-
     }
 
     protected function handleCustomerSubscriptionUpdated(array $payload)
@@ -38,9 +35,7 @@ class StripeWebhookController
         $subscription_id = $data['id'];
 
         /** @var Subscription $subscription */
-        $subscription = $user->subscriptions->filter(function (Subscription $subscription) use ($subscription_id) {
-            return $subscription->getMeta('stripe.subscription_id') === $subscription_id;
-        })->first();
+        $subscription = $user->subscriptions->filter(fn(Subscription $subscription) => $subscription->getMeta('stripe.subscription_id') === $subscription_id)->first();
 
         if (isset($data['status']) && $data['status'] === 'incomplete_expired') {
             $subscription->delete();
@@ -98,11 +93,9 @@ class StripeWebhookController
         $user = $model::with('subscriptions')->where('meta->stripe->customer_id', $customer_id)->first();
 
         if ($user) {
-            $user->subscriptions->filter(function (Subscription $subscription) use ($payload) {
-                return $subscription->getMeta('stripe.subscription_id') === $payload['data']['object']['id'];
-            })->each(function (Subscription $subscription) {
-                $subscription->markAsCancelled();
-            });
+            $user->subscriptions
+                ->filter(fn(Subscription $subscription) => $subscription->getMeta('stripe.subscription_id') === $payload['data']['object']['id'])
+                ->each(fn(Subscription $subscription) => $subscription->markAsCancelled());
         }
 
         return response('OK', 200);

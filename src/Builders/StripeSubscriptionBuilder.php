@@ -7,37 +7,25 @@ use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
 use Shekel\Tests\Fixtures\User;
+use Stripe\Customer;
 
 class StripeSubscriptionBuilder implements SubscriptionBuilderContract
 {
     /** @var User */
     private $user;
 
-    /** @var Plan */
-    private $plan;
+    private Plan $plan;
 
-    /** @var \Stripe\Plan */
-    private $stripePlan;
+    private \Stripe\Plan $stripePlan;
 
-    /** @var int */
-    private $plan_id;
+    private int $plan_id;
 
-    /** @var string */
-    private $paymentMethod;
+    private string $paymentMethod;
 
-    /** @var \Stripe\Customer */
-    private $stripeCustomer;
+    private Customer $stripeCustomer;
 
-    /** @var int */
-    private $quantity = 1;
+    private int $quantity = 1;
 
-    /**
-     * StripeSubscriptionBuilder constructor.
-     * @param $user
-     * @param int $plan_id
-     * @param string $paymentMethod
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function __construct($user, int $plan_id, string $paymentMethod)
     {
         $this->user = $user;
@@ -48,10 +36,6 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
         $this->stripePlan = \Stripe\Plan::retrieve($this->plan->getMeta('stripe.plan_id'));
     }
 
-    /**
-     * @param int $quantity
-     * @return StripeSubscriptionBuilder
-     */
     public function quantity(int $quantity): self
     {
         $this->quantity = $quantity;
@@ -59,18 +43,11 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
         return $this;
     }
 
-    /**
-     * @return int
-     */
     private function getQuantity(): int
     {
         return $this->quantity;
     }
 
-    /**
-     * @return Subscription
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function create(): Subscription
     {
         $this->stripeCustomer = $this->getStripeCustomer();
@@ -105,10 +82,6 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
         return $subscription;
     }
 
-    /**
-     * @return \Stripe\Customer
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     private function getStripeCustomer()
     {
         $customer_id = $this->user->getMeta('stripe.customer_id');

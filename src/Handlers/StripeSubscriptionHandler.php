@@ -9,33 +9,23 @@ use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Exceptions\IncompleteSubscriptionException;
 use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
-use Stripe\Exception\ApiErrorException;
 
 class StripeSubscriptionHandler implements SubscriptionHandlerContract
 {
 
-    /** @var Subscription */
-    private $subscription;
+    private Subscription $subscription;
 
     /**
      * If set to true will recalculate the cost of subscription
      * when changing plan so the user doesn't have to pay all the amount
-     * @var bool
      */
-    private $prorate = true;
+    private bool $prorate = true;
 
-    /**
-     * StripeSubscriptionHandler constructor.
-     * @param Subscription $subscription
-     */
     public function __construct(Subscription $subscription)
     {
         $this->subscription = $subscription;
     }
 
-    /**
-     * @throws ApiErrorException
-     */
     public function cancel(): void
     {
         $stripeSubscription = \Stripe\Subscription::retrieve($this->subscription->getMeta('stripe.subscription_id'));
@@ -53,9 +43,6 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $this->subscription->save();
     }
 
-    /**
-     * @throws ApiErrorException
-     */
     public function cancelNow(): void
     {
         $this->cancel();
@@ -63,10 +50,6 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $this->subscription->save();
     }
 
-    /**
-     * @param int $plan_id
-     * @throws \Exception
-     */
     public function changePlan(int $plan_id): void
     {
         if ($this->incomplete()) {
@@ -93,14 +76,8 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $stripeSubscription->save();
 
         $this->subscription->setMeta('stripe.plan_id', $stripePlanId)->save();
-
     }
 
-    /**
-     * @param int $quantity
-     * @throws IncompleteSubscriptionException
-     * @throws ApiErrorException
-     */
     public function changeQuantity(int $quantity): void
     {
         if ($this->incomplete()) {
@@ -115,25 +92,16 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $this->subscription->setMeta('stripe.quantity', $quantity)->save();
     }
 
-    /**
-     * @return bool
-     */
     public function incomplete(): bool
     {
         return (bool)$this->subscription->getMeta('stripe.status') === \Stripe\Subscription::STATUS_INCOMPLETE;
     }
 
-    /**
-     *
-     */
     public function dontProrate(): void
     {
         $this->prorate = false;
     }
 
-    /*
-     *
-     */
     public function markAsCancelled(): void
     {
         $this->subscription->ends_at = Carbon::now();

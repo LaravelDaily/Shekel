@@ -4,6 +4,7 @@ namespace Shekel\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Shekel\Traits\HasMetaField;
 
@@ -32,7 +33,7 @@ class Plan extends Model
     //Stripe prevents updating any field except trial_period_days
     const RESTRICTED_FIELDS = ['title', 'price', 'billing_period'];
 
-    public function subscriptions()
+    public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
     }

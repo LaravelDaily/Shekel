@@ -10,6 +10,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
+    "php": "^7.4",
     "stripe/stripe-php": "^7.13"
   },
   "require-dev": {

@@ -19,7 +19,7 @@ class PlanObserver
      * WHEN A PLAN IS CREATED FULL VALIDATION IS REENACTED AGAIN
      * @var bool
      */
-    static $disableRestrictedFieldValidation = false;
+    static bool $disableRestrictedFieldValidation = false;
 
     public function created(Plan $plan)
     {
@@ -61,13 +61,11 @@ class PlanObserver
         } finally {
             self::$disableRestrictedFieldValidation = false;
         }
-
     }
 
 
     public function updating(Plan $plan)
     {
-
         //STRIPE DOES NOT ALLOW UPDATING ANY FIELDS EXCEPT trial_period_days AFTER CREATION.
         if (!self::$disableRestrictedFieldValidation) {
             $intersection = array_intersect(array_keys($plan->getDirty()), Plan::RESTRICTED_FIELDS);
@@ -92,7 +90,6 @@ class PlanObserver
             ]);
 
         }
-
     }
 
 

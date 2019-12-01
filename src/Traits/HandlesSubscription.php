@@ -4,7 +4,6 @@
 namespace Shekel\Traits;
 
 
-use Carbon\Carbon;
 use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Shekel;
 
@@ -14,13 +13,8 @@ use Shekel\Shekel;
  */
 trait HandlesSubscription
 {
-    /** @var SubscriptionHandlerContract */
-    private $subscriptionHandler;
+    private ?SubscriptionHandlerContract $subscriptionHandler;
 
-    /**
-     * @return SubscriptionHandlerContract
-     * @throws \Exception
-     */
     public function handler(): SubscriptionHandlerContract
     {
         if (!$this->subscriptionHandler) {
@@ -31,44 +25,26 @@ trait HandlesSubscription
         return $this->subscriptionHandler;
     }
 
-    /**
-     * @throws \Exception
-     */
     public function cancel(): void
     {
         $this->handler()->cancel();
     }
 
-    /**
-     * @throws \Exception
-     */
     public function cancelNow(): void
     {
         $this->handler()->cancelNow();
     }
 
-    /**
-     * @return bool
-     */
     public function onTrial(): bool
     {
         return $this->trial_ends_at ? $this->trial_ends_at->gte(now()) : false;
     }
 
-    /**
-     * @return bool
-     * @throws \Exception
-     */
     public function incomplete(): bool
     {
         return (bool)$this->handler()->incomplete();
     }
 
-    /**
-     * @param int $quantity
-     * @return HandlesSubscription
-     * @throws \Exception
-     */
     public function changeQuantity(int $quantity): self
     {
         $this->handler()->changeQuantity($quantity);
@@ -76,11 +52,6 @@ trait HandlesSubscription
         return $this;
     }
 
-    /**
-     * @param int $plan_id
-     * @return HandlesSubscription
-     * @throws \Exception
-     */
     public function changePlan(int $plan_id): self
     {
         $this->handler()->changePlan($plan_id);
@@ -88,10 +59,6 @@ trait HandlesSubscription
         return $this;
     }
 
-    /**
-     * @return HandlesSubscription
-     * @throws \Exception
-     */
     public function dontProrate(): self
     {
         $this->handler()->dontProrate();
@@ -99,10 +66,6 @@ trait HandlesSubscription
         return $this;
     }
 
-    /**
-     * @return HandlesSubscription
-     * @throws \Exception
-     */
     public function markAsCancelled(): self
     {
         $this->handler()->markAsCancelled();

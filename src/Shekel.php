@@ -10,15 +10,11 @@ use Shekel\Exceptions\PaymentProviderNotFoundException;
 
 class Shekel
 {
-    static $disableAllProviders = false;
+    static bool $disableAllProviders = false;
 
     /** @var PaymentProviderContract[] */
     static $activePaymentProviders = [];
 
-    /**
-     * @param string $provider
-     * @throws \Exception
-     */
     public static function activatePaymentProvider(string $provider)
     {
         if (class_exists($provider)) {
@@ -33,11 +29,6 @@ class Shekel
         self::$activePaymentProviders[$provider::key()] = $provider;
     }
 
-    /**
-     * @param string $provider
-     * @return bool
-     * @throws \Exception
-     */
     public static function paymentProviderActive(string $provider): bool
     {
         if (self::$disableAllProviders) {
@@ -53,11 +44,6 @@ class Shekel
         }
     }
 
-    /**
-     * @param string $provider
-     * @return PaymentProviderContract
-     * @throws \Exception
-     */
     public static function getPaymentProvider(string $provider): PaymentProviderContract
     {
         $key = class_exists($provider) ? $provider::key() : $provider;
@@ -70,10 +56,6 @@ class Shekel
         throw new PaymentProviderNotFoundException('Payment provider : ' . $provider . ' not found.');
     }
 
-    /**
-     * @return string
-     * @throws CurrencyNotFoundException
-     */
     public static function getCurrency(): string
     {
         $currencies = [

@@ -16,12 +16,9 @@ use Shekel\Models\Subscription;
  */
 class StripePaymentProvider implements PaymentProviderContract
 {
-    /** @var string|null */
-    private $secretKey, $publicKey = null;
+    private ?string $secretKey = null;
+    private ?string $publicKey = null;
 
-    /**
-     * StripePaymentProvider constructor.
-     */
     public function __construct()
     {
         $this->secretKey = config('shekel.stripe.secret_key');
@@ -35,30 +32,16 @@ class StripePaymentProvider implements PaymentProviderContract
         \Stripe\Stripe::setApiKey($this->secretKey);
     }
 
-    /**
-     * @return string
-     */
     public static function key(): string
     {
         return 'stripe';
     }
 
-    /**
-     * @param Subscription $subscription
-     * @return SubscriptionHandlerContract
-     */
     public function getSubscriptionHandler(Subscription $subscription): SubscriptionHandlerContract
     {
         return new StripeSubscriptionHandler($subscription);
     }
 
-    /**
-     * @param $user
-     * @param $plan_id
-     * @param $paymentMethod
-     * @return SubscriptionBuilderContract
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function getSubscriptionBuilder($user, $plan_id, $paymentMethod): SubscriptionBuilderContract
     {
         return new StripeSubscriptionBuilder($user, $plan_id, $paymentMethod);

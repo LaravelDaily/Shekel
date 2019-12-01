@@ -6,6 +6,7 @@ namespace Shekel\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Shekel\Traits\HandlesSubscription;
 use Shekel\Traits\HasMetaField;
 
@@ -38,7 +39,7 @@ class Subscription extends Model
      * BRAINTREE - 'Pending', 'Active', 'Past Due', 'Expired', 'Canceled'
      */
 
-    public function plan()
+    public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
     }

@@ -3,7 +3,6 @@
 
 namespace Shekel\Traits;
 
-
 /**
  * Trait HasMetaField
  * @package Shekel\Traits
@@ -13,9 +12,6 @@ namespace Shekel\Traits;
 trait HasMetaField
 {
 
-    /**
-     * @return object
-     */
     public function getMetaAttribute($value)
     {
         try {
@@ -25,10 +21,6 @@ trait HasMetaField
         }
     }
 
-    /**
-     * @param $value
-     * @throws \Exception
-     */
     public function setMetaAttribute($value)
     {
         //IF A STRING IS PASSED ALONG WE IMPLY THAT IT IS A JSON STRING
@@ -44,11 +36,6 @@ trait HasMetaField
         }
     }
 
-    /**
-     * @param $key
-     * @param $value
-     * @return HasMetaField
-     */
     public function setMeta($key, $value): self
     {
         $meta = $this->meta ?? (object)[];
@@ -60,10 +47,6 @@ trait HasMetaField
         return $this;
     }
 
-    /**
-     * @param $key
-     * @return mixed
-     */
     public function getMeta($key)
     {
         return data_get($this->meta, $key, null);

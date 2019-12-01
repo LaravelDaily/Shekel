@@ -35,6 +35,7 @@ abstract class TestCase extends OrchestraTestCase
         $this->artisan('migrate')->run();
 
         Shekel::$disableAllProviders = false;
+        putenv('BILLABLE_CURRENCY=usd');
     }
 
     public function makeUser($data = []): User

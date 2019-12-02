@@ -11,5 +11,5 @@ interface SubscriptionBuilderContract
 
     public function create(): Subscription;
 
-    public function quantity(int $quantity): SubscriptionBuilderContract;
+    public function quantity(int $quantity);
 }

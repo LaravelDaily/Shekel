@@ -40,9 +40,11 @@ class ShekelServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/shekel.php.php' => $this->app->configPath('shekel.php'),
             ], 'shekel-config');
-            $this->publishes([
-                __DIR__ . '/../migrations' => $this->app->databasePath('migrations'),
-            ], 'shekel-migrations');
+            if (!Shekel::$disableMigrations) {
+                $this->publishes([
+                    __DIR__ . '/../migrations' => $this->app->databasePath('migrations'),
+                ], 'shekel-migrations');
+            }
             $this->publishes([
                 __DIR__ . '/../views' => $this->app->resourcePath('views/vendor/shekel'),
             ], 'shekel-views');

@@ -19,7 +19,7 @@ Shekel\ShekelServiceProvider::class,
 In order to use shekel you need to run migrations. It will add a **meta** field to your **users**
 table. Additionally **subscriptions** and **plans** tables will be created.
 
-//TODO make migrations publishable and add flags to disable migrations
+If you want to disable migrations just add ```Shekel::$disableMigrations = true;``` to your AppServiceProvider boot method.
 
 
 ## Configuration
@@ -37,7 +37,10 @@ class User extends Authenticatable
 }
 ```
 
-//TODO make user model configurable incase someone wants to use different billable model
+If you are using a different model just define it in your .env file 
+```
+BILLABLE_MODEL=\App\MyModel
+```
 
 ### API keys
 
@@ -51,8 +54,15 @@ STRIPE_SECRET=sk_test_xxxxxx
 
 ### Currency configuration
 
-//TODO CURRENCY (now default us dollar)
+Default currency is set to USD, but you can change that in your .env file
 
+```html
+BILLABLE_CURRENCY=eur
+```
+
+List of supported currencies (by stripe for now):
+
+USD, AED, AFN, ALL, AMD, ANG, AOA, ARS, AUD, AWG, AZN, BAM, BBD, BDT, BGN, BIF, BMD, BND, BOB, BRL, BSD, BWP, BZD, CAD, CDF, CHF, CLP, CNY, COP, CRC, CVE, CZK, DJF, DKK, DOP, DZD, EGP, ETB, EUR, FJD, FKP, GBP, GEL, GIP, GMD, GNF, GTQ, GYD, HKD, HNL, HRK, HTG, HUF, IDR, ILS, INR, ISK, JMD, JPY, KES, KGS, KHR, KMF, KRW, KYD, KZT, LAK, LBP, LKR, LRD, LSL, MAD, MDL, MGA, MKD, MMK, MNT, MOP, MRO, MUR, MVR, MWK, MXN, MYR, MZN, NAD, NGN, NIO, NOK, NPR, NZD, PAB, PEN, PGK, PHP, PKR, PLN, PYG, QAR, RON, RSD, RUB, RWF, SAR, SBD, SCR, SEK, SGD, SHP, SLL, SOS, SRD, STD, SZL, THB, TJS, TOP, TRY, TTD, TWD, TZS, UAH, UGX, UYU, UZS, VND, VUV, WST, XAF, XCD, XOF, XPF, YER, ZAR, ZMW 
 
 # Usage
 
@@ -162,9 +172,7 @@ To cancel multiple subscriptions use the provided ***subscritions*** relationshi
 ```php 
 use Shekel\Models\Subscription;
 
-$user->subscriptions()->each(function(Subscription $subscription) {
-    $subscription->cancel();
-});
+$user->subscriptions()->each(fn(Subscription $subscription) => $subscription->cancel());
 ```
 
 By default canceling a subscription will hold it's grace period until the subscription expires. 
@@ -195,18 +203,5 @@ $user->subscription()->changeQuantity(2);
 By default quantity is always set to 1 so if you want to adjust the quantity while creating the subscription use ***quantity*** method.
 
 ```php 
-$user->stripeSubscription($plan_id, $paymentMethod)->quantity(2)->create();
+$user->newSubscription('stripe', $plan_id, $paymentMethod)->quantity(2)->create();
 ```
-
-### Currencies
-
-Default currency is set to USD, but you can change that in your .env file
-
-```html
-BILLABLE_CURRENCY=eur
-```
-
-List of supported currencies (by stripe for now):
-
-USD, AED, AFN, ALL, AMD, ANG, AOA, ARS, AUD, AWG, AZN, BAM, BBD, BDT, BGN, BIF, BMD, BND, BOB, BRL, BSD, BWP, BZD, CAD, CDF, CHF, CLP, CNY, COP, CRC, CVE, CZK, DJF, DKK, DOP, DZD, EGP, ETB, EUR, FJD, FKP, GBP, GEL, GIP, GMD, GNF, GTQ, GYD, HKD, HNL, HRK, HTG, HUF, IDR, ILS, INR, ISK, JMD, JPY, KES, KGS, KHR, KMF, KRW, KYD, KZT, LAK, LBP, LKR, LRD, LSL, MAD, MDL, MGA, MKD, MMK, MNT, MOP, MRO, MUR, MVR, MWK, MXN, MYR, MZN, NAD, NGN, NIO, NOK, NPR, NZD, PAB, PEN, PGK, PHP, PKR, PLN, PYG, QAR, RON, RSD, RUB, RWF, SAR, SBD, SCR, SEK, SGD, SHP, SLL, SOS, SRD, STD, SZL, THB, TJS, TOP, TRY, TTD, TWD, TZS, UAH, UGX, UYU, UZS, VND, VUV, WST, XAF, XCD, XOF, XPF, YER, ZAR, ZMW, 
-

@@ -15,6 +15,8 @@ class Shekel
     /** @var PaymentProviderContract[] */
     static $activePaymentProviders = [];
 
+    static bool $disableMigrations = false;
+
     public static function activatePaymentProvider(string $provider)
     {
         if (class_exists($provider)) {

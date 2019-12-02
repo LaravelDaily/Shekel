@@ -22,11 +22,6 @@ trait Billable
 {
     use HasMetaField;
 
-    public function stripeSubscription(int $plan_id, string $paymentMethod): StripeSubscriptionBuilder
-    {
-        return new StripeSubscriptionBuilder($this, $plan_id, $paymentMethod);
-    }
-
     public function newSubscription(string $paymentProvider, int $plan_id, string $paymentMethod): SubscriptionBuilderContract
     {
         return Shekel::getPaymentProvider($paymentProvider)->getSubscriptionBuilder($this, $plan_id, $paymentMethod);

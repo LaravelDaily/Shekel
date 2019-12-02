@@ -196,7 +196,7 @@ class Shekel
             "ZMW",
         ];
 
-        $currency = env('BILLABLE_CURRENCY', false);
+        $currency = config('shekel.billable_currency', false);
 
         if ($currency && !in_array(strtoupper($currency), $currencies)) {
             throw new CurrencyNotFoundException($currency);

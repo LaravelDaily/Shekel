@@ -11,7 +11,7 @@ use Stripe\Customer;
 
 class StripeSubscriptionBuilder implements SubscriptionBuilderContract
 {
-    /** @var User */
+    /** @var \Shekel\Tests\Fixtures\User DONT TYPEHINT THIS PROPERTY!! */
     private $user;
 
     private Plan $plan;

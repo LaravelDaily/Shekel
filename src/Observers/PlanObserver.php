@@ -99,7 +99,6 @@ class PlanObserver
             throw new PlanHasActiveSubscriptionsException();
         }
 
-        //TODO SHOULD CHECK FOR ACTIVE SUBSCRIPTIONS HERE???
         if (Shekel::paymentProviderActive('stripe')) {
             $stripePlanId = $plan->getMeta('stripe.plan_id');
             if ($stripePlanId) {

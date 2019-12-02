@@ -100,5 +100,4 @@ class StripeWebhookController
 
         return response('OK', 200);
     }
-
 }

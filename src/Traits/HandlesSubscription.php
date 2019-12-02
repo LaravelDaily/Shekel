@@ -7,10 +7,6 @@ namespace Shekel\Traits;
 use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Shekel;
 
-/**
- * Trait HandlesSubscriptions
- * @package Shekel\Traits
- */
 trait HandlesSubscription
 {
     private ?SubscriptionHandlerContract $subscriptionHandler;

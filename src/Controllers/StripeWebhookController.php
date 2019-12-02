@@ -9,6 +9,10 @@ use Shekel\Exceptions\StripePlanNotFoundWhileUpdatingException;
 use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
 
+/**
+ * ADD MIDDLEWARE TO PROTECT THESE ROUTES
+ * ADD A TEST ROUTE TO ENSURE THAT STRIPE RECEIVES THE CORRECT URL
+ */
 class StripeWebhookController
 {
     public function handleWebhook(Request $request)
@@ -35,7 +39,10 @@ class StripeWebhookController
         $subscription_id = $data['id'];
 
         /** @var Subscription $subscription */
-        $subscription = $user->subscriptions->filter(fn(Subscription $subscription) => $subscription->getMeta('stripe.subscription_id') === $subscription_id)->first();
+        $subscription = $user->subscriptions->filter(function (Subscription $subscription) use ($subscription, $subscription_id) {
+            return $subscription->getMeta('stripe.subscription_id') === $subscription_id;
+        })->first();
+
 
         if (isset($data['status']) && $data['status'] === 'incomplete_expired') {
             $subscription->delete();
@@ -94,8 +101,12 @@ class StripeWebhookController
 
         if ($user) {
             $user->subscriptions
-                ->filter(fn(Subscription $subscription) => $subscription->getMeta('stripe.subscription_id') === $payload['data']['object']['id'])
-                ->each(fn(Subscription $subscription) => $subscription->markAsCancelled());
+                ->filter(function (Subscription $subscription) use ($payload) {
+                    return $subscription->getMeta('stripe.subscription_id') === $payload['data']['object']['id'];
+                })
+                ->each(function (Subscription $subscription) {
+                    $subscription->markAsCancelled();
+                });
         }
 
         return response('OK', 200);

@@ -10,12 +10,14 @@ use Shekel\Exceptions\PaymentProviderNotFoundException;
 
 class Shekel
 {
-    static bool $disableAllProviders = false;
+    /** @var bool  */
+    static $disableAllProviders = false;
 
     /** @var PaymentProviderContract[] */
     static $activePaymentProviders = [];
 
-    static bool $disableMigrations = false;
+    /** @var bool  */
+    static $disableMigrations = false;
 
     public static function activatePaymentProvider(string $provider)
     {

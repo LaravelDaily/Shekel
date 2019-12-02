@@ -9,7 +9,8 @@ use Shekel\Shekel;
 
 trait HandlesSubscription
 {
-    private ?SubscriptionHandlerContract $subscriptionHandler;
+    /** @var SubscriptionHandlerContract|null  */
+    private $subscriptionHandler;
 
     public function handler(): SubscriptionHandlerContract
     {

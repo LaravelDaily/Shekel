@@ -19,7 +19,7 @@ class PlanObserver
      * WHEN A PLAN IS CREATED FULL VALIDATION IS REENACTED AGAIN
      * @var bool
      */
-    static bool $disableRestrictedFieldValidation = false;
+    static $disableRestrictedFieldValidation = false;
 
     public function created(Plan $plan)
     {

@@ -16,8 +16,10 @@ use Shekel\Models\Subscription;
  */
 class StripePaymentProvider implements PaymentProviderContract
 {
-    private ?string $secretKey = null;
-    private ?string $publicKey = null;
+    /** @var \Illuminate\Config\Repository|mixed|string|null  */
+    private $secretKey = null;
+    /** @var \Illuminate\Config\Repository|mixed|string|null  */
+    private $publicKey = null;
 
     public function __construct()
     {

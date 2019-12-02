@@ -13,13 +13,15 @@ use Shekel\Models\Subscription;
 class StripeSubscriptionHandler implements SubscriptionHandlerContract
 {
 
-    private Subscription $subscription;
+    /** @var Subscription  */
+    private $subscription;
 
     /**
      * If set to true will recalculate the cost of subscription
      * when changing plan so the user doesn't have to pay all the amount
+     * @var bool
      */
-    private bool $prorate = true;
+    private $prorate = true;
 
     public function __construct(Subscription $subscription)
     {

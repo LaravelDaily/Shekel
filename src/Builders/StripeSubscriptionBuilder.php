@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
-use Shekel\Tests\Fixtures\User;
 use Stripe\Customer;
 
 class StripeSubscriptionBuilder implements SubscriptionBuilderContract
@@ -14,17 +13,23 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
     /** @var \Shekel\Tests\Fixtures\User DONT TYPEHINT THIS PROPERTY!! */
     private $user;
 
-    private Plan $plan;
+    /** @var Plan */
+    private $plan;
 
-    private \Stripe\Plan $stripePlan;
+    /** @var \Stripe\Plan  */
+    private $stripePlan;
 
-    private int $plan_id;
+    /** @var int  */
+    private $plan_id;
 
-    private string $paymentMethod;
+    /** @var string  */
+    private $paymentMethod;
 
-    private Customer $stripeCustomer;
+    /** @var Customer  */
+    private $stripeCustomer;
 
-    private int $quantity = 1;
+    /** @var int  */
+    private $quantity = 1;
 
     public function __construct($user, int $plan_id, string $paymentMethod)
     {

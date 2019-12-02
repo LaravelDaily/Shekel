@@ -198,13 +198,13 @@ class Shekel
             "ZMW",
         ];
 
-        $currency = config('shekel.billable_currency', false);
+        $currency = config('shekel.billable_currency');
 
-        if ($currency && !in_array(strtoupper($currency), $currencies)) {
+        if (!in_array(strtoupper($currency), $currencies)) {
             throw new CurrencyNotFoundException($currency);
         }
 
-        return $currency ? strtolower($currency) : 'usd';
+        return strtolower($currency);
     }
 
 }

@@ -39,7 +39,7 @@ class StripeWebhookController
         $subscription_id = $data['id'];
 
         /** @var Subscription $subscription */
-        $subscription = $user->subscriptions->filter(function (Subscription $subscription) use ($subscription, $subscription_id) {
+        $subscription = $user->subscriptions->filter(function (Subscription $subscription) use ($subscription_id) {
             return $subscription->getMeta('stripe.subscription_id') === $subscription_id;
         })->first();
 

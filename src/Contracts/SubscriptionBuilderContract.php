@@ -10,4 +10,6 @@ interface SubscriptionBuilderContract
     public function __construct($user, int $plan_id, string $paymentMethod);
 
     public function create(): Subscription;
+
+    public function quantity(int $quantity): SubscriptionBuilderContract;
 }

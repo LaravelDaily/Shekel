@@ -32,7 +32,7 @@ trait Billable
         return $this->hasMany(Subscription::class, $this->getForeignKey())->orderBy('created_at', 'desc');
     }
 
-    public function subscription(): Subscription
+    public function subscription(): ?Subscription
     {
         return $this->subscriptions->sortByDesc(function (Subscription $subscription) {
             return $subscription->created_at->getTimestamp();

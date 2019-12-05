@@ -7,6 +7,7 @@ namespace Shekel\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Shekel\Shekel;
 use Shekel\Traits\HandlesSubscription;
 use Shekel\Traits\HasMetaField;
 
@@ -42,6 +43,12 @@ class Subscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function user()
+    {
+
+        return $this->belongsTo(Shekel::userModelClass());
     }
 
 }

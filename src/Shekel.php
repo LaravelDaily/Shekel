@@ -60,6 +60,11 @@ class Shekel
         throw new PaymentProviderNotFoundException('Payment provider : ' . $provider . ' not found.');
     }
 
+    public static function userModelClass()
+    {
+        return config('shekel.billable_model');
+    }
+
     public static function getCurrency(): string
     {
         $currencies = [

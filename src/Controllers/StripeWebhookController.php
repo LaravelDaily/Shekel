@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Shekel\Exceptions\StripePlanNotFoundWhileUpdatingException;
 use Shekel\Models\Plan;
 use Shekel\Models\Subscription;
+use Shekel\Shekel;
 
 /**
  * ADD MIDDLEWARE TO PROTECT THESE ROUTES
@@ -30,7 +31,7 @@ class StripeWebhookController
 
     protected function handleCustomerSubscriptionUpdated(array $payload)
     {
-        $model = config('shekel.billable_model');
+        $model = Shekel::userModelClass();
 
         $customer_id = $payload['data']['object']['customer'];
         $user = $model::with('subscriptions')->where('meta->stripe->customer_id', $customer_id)->first();
@@ -94,7 +95,7 @@ class StripeWebhookController
 
     protected function handleCustomerSubscriptionDeleted(array $payload)
     {
-        $model = config('shekel.billable_model');
+        $model = Shekel::userModelClass();
 
         $customer_id = $payload['data']['object']['customer'];
         $user = $model::with('subscriptions')->where('meta->stripe->customer_id', $customer_id)->first();

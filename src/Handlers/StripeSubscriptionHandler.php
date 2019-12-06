@@ -85,6 +85,7 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
 
         $stripeSubscription->save();
 
+        $this->subscription->plan_id = $plan_id;
         $this->subscription->setMeta('stripe.plan_id', $stripePlanId)->save();
     }
 

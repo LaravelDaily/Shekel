@@ -38,7 +38,7 @@ class SubscriptionBuilderTest extends TestCase
         $this->assertEquals($stripeSubscription->plan->id, $plan->getMeta('stripe.plan_id'));
         $this->assertEquals($stripeSubscription->customer, $user->getMeta('stripe.customer_id'));
         $this->assertEquals($stripeSubscription->trial_end, $subscription->trial_ends_at->timestamp);
-        $this->assertEquals($stripeSubscription->current_period_end, $subscription->ends_at->timestamp);
+        $this->assertNull($subscription->ends_at);
         $this->assertEquals($stripeSubscription->status, 'trialing');
         $this->assertEquals($stripeSubscription->quantity, 1);
         $this->assertEquals($subscription->getMeta('stripe.quantity'), 1);
@@ -64,9 +64,9 @@ class SubscriptionBuilderTest extends TestCase
         $subscription = $user->newSubscription('stripe', $plan->id, $paymentMethod->id)->create();
 
         $stripeSubscription = \Stripe\Subscription::retrieve($subscription->getMeta('stripe.subscription_id'));
-        $this->assertEquals($stripeSubscription->trial_end, null);
-        $this->assertEquals($subscription->trial_ends_at, null);
-        $this->assertEquals($stripeSubscription->current_period_end, $subscription->ends_at->timestamp);
+        $this->assertNull($stripeSubscription->trial_end);
+        $this->assertNull($subscription->trial_ends_at);
+        $this->assertNull($subscription->ends_at);
         $this->assertEquals($stripeSubscription->status, 'active');
 
     }

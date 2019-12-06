@@ -54,6 +54,7 @@ class SubscriptionHandlerTest extends TestCase
 
         $subscription->fresh();
 
+        $this->assertEquals($plan2->id, $subscription->plan_id);
         $this->assertEquals($plan2->getMeta('stripe.plan_id'), $subscription->getMeta('stripe.plan_id'));
 
         $stripeSubscription = \Stripe\Subscription::retrieve($subscription->getMeta('stripe.subscription_id'));
@@ -86,6 +87,7 @@ class SubscriptionHandlerTest extends TestCase
 
         $subscription->fresh();
 
+        $this->assertEquals($plan2->id, $subscription->plan_id);
         $this->assertEquals($plan2->getMeta('stripe.plan_id'), $subscription->getMeta('stripe.plan_id'));
 
         $stripeSubscription = \Stripe\Subscription::retrieve($subscription->getMeta('stripe.subscription_id'));

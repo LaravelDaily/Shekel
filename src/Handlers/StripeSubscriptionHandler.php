@@ -13,7 +13,7 @@ use Shekel\Models\Subscription;
 class StripeSubscriptionHandler implements SubscriptionHandlerContract
 {
 
-    /** @var Subscription  */
+    /** @var Subscription */
     private $subscription;
 
     /**
@@ -27,6 +27,8 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     {
         $this->subscription = $subscription;
     }
+
+    /** ACTIONS */
 
     public function cancel(): void
     {
@@ -49,6 +51,7 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     {
         $this->cancel();
         $this->subscription->ends_at = now();
+        $this->subscription->setMeta('stripe.status', \Stripe\Subscription::STATUS_CANCELED);
         $this->subscription->save();
     }
 
@@ -94,21 +97,40 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $this->subscription->setMeta('stripe.quantity', $quantity)->save();
     }
 
-    public function incomplete(): bool
+    public function markAsCancelled(): void
     {
-        return (bool)$this->subscription->getMeta('stripe.status') === \Stripe\Subscription::STATUS_INCOMPLETE;
+        $this->subscription->ends_at = Carbon::now();
+        $this->subscription->setMeta('stripe.status', \Stripe\Subscription::STATUS_CANCELED);
+        $this->subscription->save();
     }
+
+    /** SETTINGS */
 
     public function dontProrate(): void
     {
         $this->prorate = false;
     }
 
-    public function markAsCancelled(): void
+    /** STATUSES */
+
+    public function active(): bool
     {
-        $this->subscription->ends_at = Carbon::now();
-        $this->subscription->setMeta('stripe.status', \Stripe\Subscription::STATUS_CANCELED);
-        $this->subscription->save();
+        return $this->subscription->getMeta('stripe.status') === \Stripe\Subscription::STATUS_ACTIVE;
+    }
+
+    public function onTrial(): bool
+    {
+        return $this->subscription->trial_ends_at && $this->subscription->trial_ends_at->isFuture();
+    }
+
+    public function incomplete(): bool
+    {
+        return $this->subscription->getMeta('stripe.status') === \Stripe\Subscription::STATUS_INCOMPLETE;
+    }
+
+    public function onGracePeriod(): bool
+    {
+        return $this->subscription->ends_at && $this->subscription->ends_at->isFuture();
     }
 
 }

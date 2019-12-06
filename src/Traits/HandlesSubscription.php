@@ -4,12 +4,17 @@
 namespace Shekel\Traits;
 
 
+use Illuminate\Database\Query\Builder;
 use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Shekel;
 
+/**
+ * Trait HandlesSubscription
+ * @package Shekel\Traits
+ */
 trait HandlesSubscription
 {
-    /** @var SubscriptionHandlerContract|null  */
+    /** @var SubscriptionHandlerContract|null */
     private $subscriptionHandler;
 
     public function handler(): SubscriptionHandlerContract
@@ -32,14 +37,11 @@ trait HandlesSubscription
         $this->handler()->cancelNow();
     }
 
-    public function onTrial(): bool
+    public function changePlan(int $plan_id): self
     {
-        return $this->trial_ends_at ? $this->trial_ends_at->gte(now()) : false;
-    }
+        $this->handler()->changePlan($plan_id);
 
-    public function incomplete(): bool
-    {
-        return (bool)$this->handler()->incomplete();
+        return $this;
     }
 
     public function changeQuantity(int $quantity): self
@@ -49,12 +51,14 @@ trait HandlesSubscription
         return $this;
     }
 
-    public function changePlan(int $plan_id): self
+    public function markAsCancelled(): self
     {
-        $this->handler()->changePlan($plan_id);
+        $this->handler()->markAsCancelled();
 
         return $this;
     }
+
+    /** SETTINGS */
 
     public function dontProrate(): self
     {
@@ -63,11 +67,31 @@ trait HandlesSubscription
         return $this;
     }
 
-    public function markAsCancelled(): self
-    {
-        $this->handler()->markAsCancelled();
+    /** STATUSES */
 
-        return $this;
+    public function valid(): bool
+    {
+        return $this->active() || $this->onTrial() || $this->onGracePeriod();
+    }
+
+    public function active(): bool
+    {
+        return $this->handler()->active();
+    }
+
+    public function onTrial(): bool
+    {
+        return $this->handler()->onTrial();
+    }
+
+    public function incomplete(): bool
+    {
+        return $this->handler()->incomplete();
+    }
+
+    public function onGracePeriod(): bool
+    {
+        return $this->handler()->onGracePeriod();
     }
 
 }

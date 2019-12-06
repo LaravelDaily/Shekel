@@ -40,6 +40,8 @@ class Subscription extends Model
      * BRAINTREE - 'Pending', 'Active', 'Past Due', 'Expired', 'Canceled'
      */
 
+    //RELATIONSHIPS
+
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
@@ -47,7 +49,6 @@ class Subscription extends Model
 
     public function user()
     {
-
         return $this->belongsTo(Shekel::userModelClass());
     }
 

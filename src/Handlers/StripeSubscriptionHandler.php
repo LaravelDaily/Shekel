@@ -106,7 +106,7 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
 
     public function currentPeriodEndsAt(): Carbon
     {
-        return Carbon::createFromFormat('U', $this->subscription->getMeta('stripe.current_period_ends_at'));
+        return Carbon::createFromFormat('U', $this->subscription->getMeta('stripe.current_period_end'));
     }
 
     /** SETTINGS */

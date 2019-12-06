@@ -35,8 +35,6 @@ trait Billable
     {
         return $this->subscriptions->sortByDesc(function (Subscription $subscription) {
             return $subscription->created_at->getTimestamp();
-        })->filter(function (Subscription $subscription) {
-            return $subscription->valid();
         })->first();
     }
 

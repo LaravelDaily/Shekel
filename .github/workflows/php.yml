@@ -17,7 +17,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-suggest
     
     - name: Run tests
-      run: php7.3 vendor/bin/phpunit
+      run: php7.3 vendor/bin/phpunit tests
       env:
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}

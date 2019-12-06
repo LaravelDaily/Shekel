@@ -34,5 +34,8 @@
         "Shekel\\ShekelServiceProvider"
       ]
     }
+  },
+  "scripts": {
+    "test" : "vendor/bin/phpunit"
   }
 }

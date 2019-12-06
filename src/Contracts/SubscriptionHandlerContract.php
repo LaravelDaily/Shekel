@@ -4,6 +4,7 @@
 namespace Shekel\Contracts;
 
 
+use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 
 interface SubscriptionHandlerContract
@@ -20,6 +21,10 @@ interface SubscriptionHandlerContract
 
     public function markAsCancelled(): void;
 
+    /** ATTRIBUTES */
+
+    public function currentPeriodEndsAt(): Carbon;
+    
     /** SETTINGS */
 
     public function dontProrate(): void;

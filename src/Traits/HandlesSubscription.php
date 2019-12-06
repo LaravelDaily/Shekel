@@ -4,7 +4,7 @@
 namespace Shekel\Traits;
 
 
-use Illuminate\Database\Query\Builder;
+use Carbon\Carbon;
 use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Shekel;
 
@@ -56,6 +56,13 @@ trait HandlesSubscription
         $this->handler()->markAsCancelled();
 
         return $this;
+    }
+
+    /** ATTRIBUTES */
+
+    public function currentPeriodEndsAt(): Carbon
+    {
+        return $this->handler()->currentPeriodEndsAt();
     }
 
     /** SETTINGS */

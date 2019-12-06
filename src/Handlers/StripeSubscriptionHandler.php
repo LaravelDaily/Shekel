@@ -102,6 +102,13 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $this->subscription->setMeta('stripe.quantity', $quantity)->save();
     }
 
+    /** ATTRIBUTES */
+
+    public function currentPeriodEndsAt(): Carbon
+    {
+        return Carbon::createFromTimestamp($this->subscription->getMeta('stripe.current_period_ends_at'));
+    }
+
     /** SETTINGS */
 
     public function dontProrate(): void

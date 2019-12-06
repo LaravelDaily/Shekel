@@ -50,7 +50,12 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     public function cancelNow(): void
     {
         $this->cancel();
-        $this->subscription->ends_at = now();
+        $this->markAsCancelled();
+    }
+
+    public function markAsCancelled(): void
+    {
+        $this->subscription->ends_at = Carbon::now();
         $this->subscription->setMeta('stripe.status', \Stripe\Subscription::STATUS_CANCELED);
         $this->subscription->save();
     }
@@ -97,13 +102,6 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
         $this->subscription->setMeta('stripe.quantity', $quantity)->save();
     }
 
-    public function markAsCancelled(): void
-    {
-        $this->subscription->ends_at = Carbon::now();
-        $this->subscription->setMeta('stripe.status', \Stripe\Subscription::STATUS_CANCELED);
-        $this->subscription->save();
-    }
-
     /** SETTINGS */
 
     public function dontProrate(): void
@@ -115,7 +113,7 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
 
     public function active(): bool
     {
-        return $this->subscription->getMeta('stripe.status') === \Stripe\Subscription::STATUS_ACTIVE;
+        return $this->onTrial() || $this->onGracePeriod() || $this->subscription->getMeta('stripe.status') === \Stripe\Subscription::STATUS_ACTIVE;
     }
 
     public function onTrial(): bool
@@ -131,6 +129,11 @@ class StripeSubscriptionHandler implements SubscriptionHandlerContract
     public function onGracePeriod(): bool
     {
         return $this->subscription->ends_at && $this->subscription->ends_at->isFuture();
+    }
+
+    public function canceled(): bool
+    {
+        return (bool)$this->subscription->ends_at;
     }
 
 }

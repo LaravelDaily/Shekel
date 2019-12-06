@@ -69,11 +69,6 @@ trait HandlesSubscription
 
     /** STATUSES */
 
-    public function valid(): bool
-    {
-        return $this->active() || $this->onTrial() || $this->onGracePeriod();
-    }
-
     public function active(): bool
     {
         return $this->handler()->active();
@@ -92,6 +87,11 @@ trait HandlesSubscription
     public function onGracePeriod(): bool
     {
         return $this->handler()->onGracePeriod();
+    }
+
+    public function canceled(): bool
+    {
+        return $this->handler()->canceled();
     }
 
 }

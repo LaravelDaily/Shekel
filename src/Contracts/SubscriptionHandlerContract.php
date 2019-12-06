@@ -34,4 +34,6 @@ interface SubscriptionHandlerContract
 
     public function onGracePeriod(): bool;
 
+    public function canceled(): bool;
+
 }

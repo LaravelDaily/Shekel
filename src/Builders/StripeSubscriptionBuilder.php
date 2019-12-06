@@ -16,19 +16,19 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
     /** @var Plan */
     private $plan;
 
-    /** @var \Stripe\Plan  */
+    /** @var \Stripe\Plan */
     private $stripePlan;
 
-    /** @var int  */
+    /** @var int */
     private $plan_id;
 
-    /** @var string  */
+    /** @var string */
     private $paymentMethod;
 
-    /** @var Customer  */
+    /** @var Customer */
     private $stripeCustomer;
 
-    /** @var int  */
+    /** @var int */
     private $quantity = 1;
 
     public function __construct($user, int $plan_id, string $paymentMethod)
@@ -76,10 +76,11 @@ class StripeSubscriptionBuilder implements SubscriptionBuilderContract
                     'plan_id' => $stripeSubscription->plan->id,
                     'status' => $stripeSubscription->status,
                     'quantity' => $stripeSubscription->quantity,
+                    'current_period_end' => $stripeSubscription->current_period_end,
                 ],
             ],
             'trial_ends_at' => $stripeSubscription->trial_end ? Carbon::createFromFormat('U', $stripeSubscription->trial_end) : null,
-            'ends_at' => Carbon::createFromFormat('U', $stripeSubscription->current_period_end),
+            'ends_at' => null,
         ]);
 
         $subscription->save();

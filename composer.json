@@ -2,6 +2,7 @@
   "name": "shekel/shekel",
   "type": "project",
   "license": "MIT",
+  "description": "Payment package for laravel applications",
   "authors": [
     {
       "name": "Karolis",

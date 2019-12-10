@@ -6,9 +6,11 @@ use Shekel\Builders\StripeSubscriptionBuilder;
 use Shekel\Contracts\PaymentProviderContract;
 use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Contracts\SubscriptionHandlerContract;
+use Shekel\Exceptions\InvalidStripeCustomerException;
 use Shekel\Exceptions\PaymentProviderConstructExcelption;
 use Shekel\Handlers\StripeSubscriptionHandler;
 use Shekel\Models\Subscription;
+use Shekel\Tests\Fixtures\User;
 
 /**
  * Class Stripe
@@ -20,6 +22,9 @@ class StripePaymentProvider implements PaymentProviderContract
     private $secretKey = null;
     /** @var \Illuminate\Config\Repository|mixed|string|null */
     private $publicKey = null;
+
+    /** @var User|null */
+    private $user = null;
 
     public function __construct()
     {
@@ -34,6 +39,11 @@ class StripePaymentProvider implements PaymentProviderContract
         }
 
         \Stripe\Stripe::setApiKey($this->secretKey);
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
     }
 
     public static function key(): string
@@ -51,4 +61,46 @@ class StripePaymentProvider implements PaymentProviderContract
         return new StripeSubscriptionBuilder($user, $plan_id, $paymentMethod);
     }
 
+    public function getDefaultPaymentMethod()
+    {
+        $this->assertCustomerExists();
+        $customer_id = $this->user->getMeta('stripe.customer_id');
+        if (!$customer_id) {
+            return null;
+        }
+
+        $customer = \Stripe\Customer::retrieve($customer_id);
+        if (!$customer->invoice_settings->default_payment_method) {
+            return null;
+        }
+
+        return \Stripe\PaymentMethod::retrieve($customer->invoice_settings->default_payment_method);
+    }
+
+    public function updateDefaultPaymentMethod(string $paymentMethod)
+    {
+        $this->assertCustomerExists();
+        $stripePaymentMethod = \Stripe\PaymentMethod::retrieve($paymentMethod);
+
+        $customer_id = $this->user->getMeta('stripe.customer_id');
+        if (!$customer_id) {
+            return null;
+        }
+        $customer = \Stripe\Customer::retrieve($customer_id);
+
+        if ($customer->invoice_settings->default_payment_method === $stripePaymentMethod->id) {
+            return;
+        }
+
+        $stripePaymentMethod->attach(['customer' => $customer_id]);
+        $customer->invoice_settings = ['default_payment_method' => $stripePaymentMethod->id];
+        $customer->save();
+    }
+
+    private function assertCustomerExists()
+    {
+        if (!$this->user->getMeta('stripe.customer_id')) {
+            throw new InvalidStripeCustomerException();
+        }
+    }
 }

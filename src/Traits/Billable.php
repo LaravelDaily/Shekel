@@ -6,6 +6,7 @@ namespace Shekel\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Shekel\Contracts\PaymentProviderContract;
 use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Models\Subscription;
 use Shekel\Shekel;
@@ -36,6 +37,14 @@ trait Billable
         return $this->subscriptions->sortByDesc(function (Subscription $subscription) {
             return $subscription->created_at->getTimestamp();
         })->first();
+    }
+
+    public function stripe(): PaymentProviderContract
+    {
+        $provider = Shekel::getPaymentProvider('stripe');
+        $provider->setUser($this);
+
+        return $provider;
     }
 
 }

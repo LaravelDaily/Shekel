@@ -31,4 +31,4 @@ jobs:
       env: 
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
-        DATABASE_USER:  root
+        DB_USERNAME:  root

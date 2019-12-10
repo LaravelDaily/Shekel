@@ -11,7 +11,6 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_USER: forge
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_DATABASE: testing
         ports:
@@ -32,3 +31,4 @@ jobs:
       env: 
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
+        DATABASE_USER:  root

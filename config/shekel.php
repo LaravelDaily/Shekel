@@ -4,7 +4,7 @@ use Shekel\Providers\StripePaymentProvider;
 
 return [
 
-    'active_payment_providers' => [
+    'providers' => [
         StripePaymentProvider::class,
     ],
 

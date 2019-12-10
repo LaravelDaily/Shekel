@@ -33,9 +33,7 @@ class StripePaymentProvider implements PaymentProviderContract
 
 
         if (!$this->secretKey || !$this->publicKey) {
-            if (!app()->runningInConsole()) {
-                throw new PaymentProviderConstructExcelption('Can\'t construct StripePaymentProvider - STRIPE_PUBLIC or STRIPE_SECRET key not set.');
-            }
+            throw new PaymentProviderConstructExcelption('Can\'t construct StripePaymentProvider - STRIPE_PUBLIC or STRIPE_SECRET key not set in env.');
         }
 
         \Stripe\Stripe::setApiKey($this->secretKey);

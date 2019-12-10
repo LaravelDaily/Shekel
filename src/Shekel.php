@@ -7,31 +7,21 @@ namespace Shekel;
 use Shekel\Contracts\PaymentProviderContract;
 use Shekel\Exceptions\CurrencyNotFoundException;
 use Shekel\Exceptions\PaymentProviderNotFoundException;
+use Shekel\Exceptions\PaymentProviderNotInConfigException;
+use Shekel\Providers\StripePaymentProvider;
 
 class Shekel
 {
-    /** @var bool  */
     static $disableAllProviders = false;
 
     /** @var PaymentProviderContract[] */
     static $activePaymentProviders = [];
 
-    /** @var bool  */
+    static $paymentProviders = [
+        'stripe' => StripePaymentProvider::class,
+    ];
+
     static $disableMigrations = false;
-
-    public static function activatePaymentProvider(string $provider)
-    {
-        if (class_exists($provider)) {
-            $provider = new $provider();
-        } else {
-            throw new \Exception('Payment provider "' . $provider . '" not found.');
-        }
-        if (!$provider instanceof PaymentProviderContract) {
-            throw new \Exception('Payment provider has to implement "' . PaymentProviderContract::class . '" in order to be active');
-        }
-
-        self::$activePaymentProviders[$provider::key()] = $provider;
-    }
 
     public static function paymentProviderActive(string $provider): bool
     {
@@ -52,12 +42,25 @@ class Shekel
     {
         $key = class_exists($provider) ? $provider::key() : $provider;
 
-        //If resolving by key we can return the value straight from the array
-        if (isset(self::$activePaymentProviders[$key])) {
-            return self::$activePaymentProviders[$key];
+        //check if key is valid
+        if (!isset(static::$paymentProviders[$key])) {
+            throw new PaymentProviderNotFoundException($key);
         }
 
-        throw new PaymentProviderNotFoundException('Payment provider : ' . $provider . ' not found.');
+        $providerClass = static::$paymentProviders[$key];
+
+        //check if selected provider is in config
+        $configuredProviders = config('shekel.providers');
+        if (!in_array($key, $configuredProviders) && !in_array($providerClass, $configuredProviders)) {
+            throw new PaymentProviderNotInConfigException($key);
+        }
+
+        //if provider is not instantiated create a singleton
+        if (!isset(static::$activePaymentProviders[$key])) {
+            static::$activePaymentProviders[$providerClass::key()] = new $providerClass();
+        }
+
+        return static::$activePaymentProviders[$key];
     }
 
     public static function userModelClass()

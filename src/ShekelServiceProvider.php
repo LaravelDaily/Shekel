@@ -25,13 +25,7 @@ class ShekelServiceProvider extends ServiceProvider
     public function boot()
     {
         Plan::observe(PlanObserver::class);
-
-        foreach (config('shekel.active_payment_providers') as $provider) {
-            Shekel::activatePaymentProvider($provider);
-        }
-
         $this->publish();
-
     }
 
     public function publish()

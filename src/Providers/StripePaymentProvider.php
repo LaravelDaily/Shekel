@@ -16,9 +16,9 @@ use Shekel\Models\Subscription;
  */
 class StripePaymentProvider implements PaymentProviderContract
 {
-    /** @var \Illuminate\Config\Repository|mixed|string|null  */
+    /** @var \Illuminate\Config\Repository|mixed|string|null */
     private $secretKey = null;
-    /** @var \Illuminate\Config\Repository|mixed|string|null  */
+    /** @var \Illuminate\Config\Repository|mixed|string|null */
     private $publicKey = null;
 
     public function __construct()
@@ -28,7 +28,9 @@ class StripePaymentProvider implements PaymentProviderContract
 
 
         if (!$this->secretKey || !$this->publicKey) {
-            throw new PaymentProviderConstructExcelption('Can\'t construct StripePaymentProvider - secret or public key not set.');
+            if (!app()->runningInConsole()) {
+                throw new PaymentProviderConstructExcelption('Can\'t construct StripePaymentProvider - STRIPE_PUBLIC or STRIPE_SECRET key not set.');
+            }
         }
 
         \Stripe\Stripe::setApiKey($this->secretKey);

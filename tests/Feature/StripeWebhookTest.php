@@ -36,7 +36,7 @@ class StripeWebhookTest extends TestCase
 
         $response = $this->postJson('/stripe/webhook', $payload);
 
-        $response->assertStatus(201);
+        $response->assertStatus(200);
 
         /** @var Subscription $subscription */
         $subscription = Subscription::where('meta->stripe->subscription_id', 'sub_00000000000000')->first();

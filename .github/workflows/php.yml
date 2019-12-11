@@ -22,8 +22,6 @@ jobs:
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
         DB_CONNECTION: testing
-
-    - name: action-slack
       uses: 8398a7/action-slack@v2.4.2
       with:
         status: ${{ job.status }}

@@ -36,7 +36,6 @@ class StripeWebhookTest extends TestCase
 
         $response = $this->postJson('/stripe/webhook', $payload);
 
-        dd($response->content());
         $response->assertStatus(200);
 
         /** @var Subscription $subscription */

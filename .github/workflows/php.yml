@@ -21,4 +21,4 @@ jobs:
       env: 
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
-        DB_CONNECTION=testing
+        DB_CONNECTION: testing

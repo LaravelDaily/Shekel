@@ -22,3 +22,14 @@ jobs:
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
         DB_CONNECTION: testing
+
+    - name: action-slack
+      uses: 8398a7/action-slack@v2.4.2
+      with:
+        status: ${{ job.status }}
+        author_name: Shekel tests
+        only_mention_fail: here
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()

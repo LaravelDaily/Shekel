@@ -25,6 +25,9 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
     
+    - name: Create database
+      run: mysql -u root -proot -e 'CREATE DATABASE IF NOT EXISTS testing;'
+    
     - name: Run tests
       run: vendor/bin/phpunit tests
       env: 

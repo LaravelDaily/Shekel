@@ -22,7 +22,8 @@ jobs:
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
         DB_CONNECTION: testing
-      uses: 8398a7/action-slack@v2.4.2
+
+    - uses: 8398a7/action-slack@v2.4.2
       with:
         status: ${{ job.status }}
         author_name: Shekel tests

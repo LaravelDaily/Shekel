@@ -4,7 +4,7 @@
 namespace Shekel\Tests\Feature;
 
 
-use Shekel\Exceptions\PaymentProviderConstructExcelption;
+use Shekel\Exceptions\PaymentProviderConstructException;
 use Shekel\Exceptions\PaymentProviderNotFoundException;
 use Shekel\Exceptions\PaymentProviderNotInConfigException;
 use Shekel\Providers\StripePaymentProvider;
@@ -13,16 +13,14 @@ use Shekel\Tests\TestCase;
 
 class ShekelProviderResolvingTest extends TestCase
 {
-    public function test_resolving_stripe_provider_withou_api_keys()
+
+    public function test_ensure_providers_are_resolved_correctly()
     {
-        config(['shekel.stripe' => [
-            'public_key' => null,
-            'secret_key' => null,
-        ]]);
+        $stripePaymentProvider = Shekel::getPaymentProvider('stripe');
+        $stripePaymentProviderByClass = Shekel::getPaymentProvider(StripePaymentProvider::class);
 
-        $this->expectException(PaymentProviderConstructExcelption::class);
-        Shekel::getPaymentProvider('stripe');
-
+        $this->assertInstanceOf(StripePaymentProvider::class, $stripePaymentProvider);
+        $this->assertInstanceOf(StripePaymentProvider::class, $stripePaymentProviderByClass);
     }
 
     public function test_resolving_unconfigured_provider()
@@ -33,13 +31,16 @@ class ShekelProviderResolvingTest extends TestCase
         Shekel::getPaymentProvider('stripe');
     }
 
-    public function test_ensure_providers_are_resolved_correctly()
+    public function test_resolving_stripe_provider_without_api_keys()
     {
-        $stripePaymentProvider = Shekel::getPaymentProvider('stripe');
-        $stripePaymentProviderByClass = Shekel::getPaymentProvider(StripePaymentProvider::class);
+        config(['shekel.stripe' => [
+            'public_key' => null,
+            'secret_key' => null,
+        ]]);
 
-        $this->assertInstanceOf(StripePaymentProvider::class, $stripePaymentProvider);
-        $this->assertInstanceOf(StripePaymentProvider::class, $stripePaymentProviderByClass);
+        $this->expectException(PaymentProviderConstructException::class);
+        Shekel::getPaymentProvider('stripe');
+
     }
 
     public function test_resolving_unknown_provider_throws_exception()

@@ -4,7 +4,7 @@
 namespace Shekel\Exceptions;
 
 
-class PaymentProviderConstructExcelption extends \Exception
+class PaymentProviderConstructException extends \Exception
 {
 
     public function __construct($message)

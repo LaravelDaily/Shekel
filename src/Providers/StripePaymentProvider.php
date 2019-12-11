@@ -7,7 +7,7 @@ use Shekel\Contracts\PaymentProviderContract;
 use Shekel\Contracts\SubscriptionBuilderContract;
 use Shekel\Contracts\SubscriptionHandlerContract;
 use Shekel\Exceptions\InvalidStripeCustomerException;
-use Shekel\Exceptions\PaymentProviderConstructExcelption;
+use Shekel\Exceptions\PaymentProviderConstructException;
 use Shekel\Handlers\StripeSubscriptionHandler;
 use Shekel\Models\Subscription;
 use Shekel\Tests\Fixtures\User;
@@ -31,9 +31,8 @@ class StripePaymentProvider implements PaymentProviderContract
         $this->secretKey = config('shekel.stripe.secret_key');
         $this->publicKey = config('shekel.stripe.public_key');
 
-
         if (!$this->secretKey || !$this->publicKey) {
-            throw new PaymentProviderConstructExcelption('Can\'t construct StripePaymentProvider - STRIPE_PUBLIC or STRIPE_SECRET key not set in env.');
+            throw new PaymentProviderConstructException('Can\'t construct StripePaymentProvider - STRIPE_PUBLIC or STRIPE_SECRET key not set in env.');
         }
 
         \Stripe\Stripe::setApiKey($this->secretKey);

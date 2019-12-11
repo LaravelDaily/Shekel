@@ -7,15 +7,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: false
-          MYSQL_DATABASE: testing
-        ports:
-          - 3306
-
     steps:
     - uses: actions/checkout@v1
 
@@ -25,15 +16,8 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
     
-    - name: Create database
-      run: mysql -u root -proot -e 'CREATE DATABASE IF NOT EXISTS testing;'
-    
     - name: Run tests
       run: vendor/bin/phpunit tests
       env: 
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
-        DB_USERNAME:  root
-        DB_PASSWORD: root
-        DB_PORT: 3306 
-        DB_DATABASE: testing 

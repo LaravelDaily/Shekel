@@ -22,7 +22,6 @@ abstract class TestCase extends OrchestraTestCase
 
     public function setUp(): void
     {
-
         if (file_exists(__DIR__ . '/../.env')) {
             Dotenv::create(__DIR__ . '/..')->load();
         }

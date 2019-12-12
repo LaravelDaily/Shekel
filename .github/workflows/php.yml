@@ -21,13 +21,15 @@ jobs:
       env: 
         STRIPE_PUBLIC: ${{ secrets.STRIPE_PUBLIC }}
         STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
+        PAYPAL_CLIENT_KEY: ${{ secrets.PAYPAL_CLIENT_KEY }}
+        PAYPAL_SECRET: ${{ secrets.PAYPAL_SECRET }}
         DB_CONNECTION: testing
 
     - uses: 8398a7/action-slack@v2.4.2
       with:
         status: ${{ job.status }}
         author_name: Shekel tests
-        only_mention_fail: here
+        only_mention_fail: karolis
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

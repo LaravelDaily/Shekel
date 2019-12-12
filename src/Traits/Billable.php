@@ -41,7 +41,7 @@ trait Billable
 
     public function stripe(): PaymentProviderContract
     {
-        $provider = Shekel::getPaymentProvider('stripe');
+        $provider = Shekel::stripe();
         $provider->setUser($this);
 
         return $provider;

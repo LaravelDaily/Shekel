@@ -38,11 +38,6 @@ class StripePaymentProvider implements PaymentProviderContract
         \Stripe\Stripe::setApiKey($this->secretKey);
     }
 
-    public function setUser($user)
-    {
-        $this->user = $user;
-    }
-
     public static function key(): string
     {
         return 'stripe';
@@ -92,6 +87,11 @@ class StripePaymentProvider implements PaymentProviderContract
         $stripePaymentMethod->attach(['customer' => $customer_id]);
         $customer->invoice_settings = ['default_payment_method' => $stripePaymentMethod->id];
         $customer->save();
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
     }
 
     private function assertCustomerExists()

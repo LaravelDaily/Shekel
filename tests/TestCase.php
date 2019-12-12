@@ -36,6 +36,12 @@ abstract class TestCase extends OrchestraTestCase
         Shekel::$disableAllProviders = false;
         Shekel::$activePaymentProviders = [];
         putenv('BILLABLE_CURRENCY=usd');
+
+
+        config(['shekel.providers' => [
+            \Shekel\Providers\StripePaymentProvider::class,
+            \Shekel\Providers\PaypalPaymentProvider::class,
+        ]]);
     }
 
     public function makeUser($data = []): User

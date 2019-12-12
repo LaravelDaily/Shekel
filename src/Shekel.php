@@ -8,10 +8,20 @@ use Shekel\Contracts\PaymentProviderContract;
 use Shekel\Exceptions\CurrencyNotFoundException;
 use Shekel\Exceptions\PaymentProviderNotFoundException;
 use Shekel\Exceptions\PaymentProviderNotInConfigException;
+use Shekel\Providers\PaypalPaymentProvider;
 use Shekel\Providers\StripePaymentProvider;
 
+/**
+ * Class Shekel
+ * @package Shekel
+ *
+ * @method StripePaymentProvider stripe
+ * @method PaypalPaymentProvider paypal
+ */
 class Shekel
 {
+    static $debug = false;
+
     static $disableAllProviders = false;
 
     /** @var PaymentProviderContract[] */
@@ -19,6 +29,7 @@ class Shekel
 
     static $paymentProviders = [
         'stripe' => StripePaymentProvider::class,
+        'paypal' => PaypalPaymentProvider::class,
     ];
 
     static $disableMigrations = false;
@@ -33,7 +44,7 @@ class Shekel
             self::getPaymentProvider($provider);
 
             return true;
-        } catch (PaymentProviderNotFoundException $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
@@ -217,4 +228,8 @@ class Shekel
         return strtolower($currency);
     }
 
+    public static function __callStatic($name, $params)
+    {
+        return self::getPaymentProvider($name);
+    }
 }

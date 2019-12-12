@@ -12,7 +12,7 @@ use Shekel\Traits\HasMetaField;
  * Class Plan
  * @package Shekel\Models
  *
- * @property string $tile
+ * @property string $title
  * @property integer $price
  * @property string $billing_period
  * @property integer $trial_period_days

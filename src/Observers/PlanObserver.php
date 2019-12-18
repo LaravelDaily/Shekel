@@ -58,7 +58,7 @@ class PlanObserver
             if (Shekel::paymentProviderActive('paypal')) {
 
                 $paypalPlan = new \PayPal\Api\Plan();
-                $paypalPlan->setDescription('Payment')->setType('infinite')->setName($plan->title);
+                $paypalPlan->setDescription('Payment')->setState('ACTIVE')->setType('infinite')->setName($plan->title);
 
                 $paypalAmount = new \PayPal\Api\Currency(['value' => $plan->price, 'currency' => strtoupper(Shekel::getCurrency())]);
 
@@ -137,23 +137,57 @@ class PlanObserver
 
         if (Shekel::paymentProviderActive('stripe') && $stripePlanId = $plan->getMeta('stripe.plan_id')) {
             \Stripe\Plan::update($stripePlanId, [
-                'trial_period_days' => $plan->trial_period_days ?? null,
+                'trial_period_days' => $plan->trial_period_days ?? 0,
             ]);
         }
 
         if (Shekel::paymentProviderActive('paypal') && $paypalPlanId = $plan->getMeta('paypal.plan_id')) {
             $paypalPlan = \PayPal\Api\Plan::get($paypalPlanId, Shekel::paypal()->getApiContext());
+            $paymentDefinitions = collect($paypalPlan->getPaymentDefinitions());
+            $trialDefinition = $paymentDefinitions->where('type', 'TRIAL')->first();
 
-            $patch =
-                (new \PayPal\Api\Patch())
+            //CREATE
+            if (!$trialDefinition && $plan->trial_period_days) {
+                $trial = new \PayPal\Api\PaymentDefinition();
+                $trial->setName('Trial period');
+                $trial->setType('TRIAL');
+                $trial->setCycles(1);
+                $trial->setFrequency('Day');
+                $trial->setFrequencyInterval($plan->trial_period_days);
+                $trial->setAmount(new \PayPal\Api\Currency(['value' => 0, 'currency' => strtoupper(Shekel::getCurrency())]));
+
+                $patch = (new \PayPal\Api\Patch())
+                    ->setOp('add')
+                    ->setPath('/payment-definitions/')
+                    ->setValue($trial);
+            }
+
+            //UPDATE
+            if ($trialDefinition && $plan->trial_period_days) {
+                $patch = (new \PayPal\Api\Patch())
                     ->setOp('replace')
-                    ->setPath('/payment-definitions/' . $paypalPlan->getPaymentDefinitions()[1]->getId())
+                    ->setPath('/payment-definitions/' . $trialDefinition->getId())
                     ->setValue(['frequency_interval' => $plan->trial_period_days]);
+            }
 
-            $patchRequest = new \PayPal\Api\PatchRequest();
-            $patchRequest->addPatch($patch);
+            //DELETE
+            if ($trialDefinition && !$plan->trial_period_days) {
+                $patch = (new \PayPal\Api\Patch())
+                    ->setOp('remove')
+                    ->setPath('/payment-definitions/' . $trialDefinition->getId());
+            }
 
-            $paypalPlan->update($patchRequest, Shekel::paypal()->getApiContext());
+            if (isset($patch)) {
+                $patchRequest = new \PayPal\Api\PatchRequest();
+                $patchRequest->addPatch($patch);
+                dump($patch);
+                try {
+                    $paypalPlan->update($patchRequest, Shekel::paypal()->getApiContext());
+                } catch (\Exception $e) {
+//                    dd($e->getData(), $paypalPlan);
+                    throw $e;
+                }
+            }
         }
 
     }

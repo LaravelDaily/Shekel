@@ -11,7 +11,7 @@ use Shekel\Shekel;
 use Shekel\Tests\TestCase;
 use Stripe\Exception\InvalidRequestException;
 
-class PaypalPlanTest extends TestCase
+class PlanTest extends TestCase
 {
 
     private function newPlan(array $fields = []): Plan
@@ -132,6 +132,28 @@ class PaypalPlanTest extends TestCase
             $this->assertEquals('Day', $trialDefinition->frequency);
             $this->assertEquals(1, $trialDefinition->cycles);
             $this->assertEquals($plan->trial_period_days, $trialDefinition->frequency_interval);
+        }
+
+        $plan->delete();
+    }
+
+    public function test_plan_updated_to_no_trial()
+    {
+        $plan = $this->newPlan(['trial_period_days' => 30]);
+        $plan->update(['trial_period_days' => null]);
+
+        $this->assertEquals(null, $plan->trial_period_days);
+
+        if (Shekel::paymentProviderActive('stripe')) {
+            $stripePlan = \Stripe\Plan::retrieve($plan->getMeta('stripe.plan_id'));
+            $this->assertEquals(null, $stripePlan->trial_period_days);
+        }
+
+        if (Shekel::paymentProviderActive('paypal')) {
+            $paypalPlan = \PayPal\Api\Plan::get($plan->getMeta('paypal.plan_id'), Shekel::paypal()->getApiContext());
+            $trialDefinition = collect($paypalPlan->getPaymentDefinitions())->where('type', 'TRIAL')->first();
+            dd($paypalPlan);
+            $this->assertNull($trialDefinition);
         }
 
         $plan->delete();

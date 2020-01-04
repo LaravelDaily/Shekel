@@ -4,7 +4,7 @@ namespace Shekel;
 
 use Illuminate\Support\ServiceProvider;
 use Shekel\Models\Plan;
-use Shekel\Commands\CreatePlanCommand;
+use Shekel\Observers\PlanObserver;
 
 class ShekelServiceProvider extends ServiceProvider
 {
@@ -24,12 +24,8 @@ class ShekelServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        Plan::observe(PlanObserver::class);
         $this->publish();
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                CreatePlanCommand::class,
-            ]);
-        }
     }
 
     public function publish()
